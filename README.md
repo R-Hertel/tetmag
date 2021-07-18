@@ -45,10 +45,10 @@ sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev build-essentia
 
 ## Pre- and Postprocessing
 
-The following software is required or recommended to generate input data for tetmag and to analyze the simulation results
+The following software is required or recommended to generate input data for tetmag and to analyze the simulation results:
 
 - [ParaView](https://www.paraview.org) - Data visualization 
-- [gmsh](https://www.paraview.org/) or [netgen](https://ngsolve.org) - Finite-element mesh generation
+- [gmsh](https://gmsh.info) or [netgen](https://ngsolve.org) - Finite-element mesh generation
 - [FreeCAD](https://www.freecadweb.org) - Design of three-dimensional objects
 
 ## Usage
