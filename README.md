@@ -3,32 +3,34 @@
 ![GitHub Stars](https://img.shields.io/github/stars/R-Hertel/tetmag?style=plastic)
 ![GitHub Release Date](https://img.shields.io/github/release-date/R-Hertel/tetmag?style=plastic)
 
-# tetmag
-A finite-element software for large-scale micromagnetic simulations.
+
+ <img src="https://github.com/R-Hertel/tetmag/blob/main/resources/tetmagLogo_v4.png" width="400" >
+tetmag is a finite-element software for large-scale micromagnetic simulations.
 <!--- ![tetmag logo](https://github.com/R-Hertel/tetmag/blob/main/resources/tetmagLogo_v1.png) --->
- <img src="https://github.com/R-Hertel/tetmag/blob/main/resources/tetmagLogo_v1.png" width="400"  >
+
        
 
-## Install
+## Installation
 
-### Requirements:
+### Requirements
 
 - Ubuntu 20.04: 
   Install the following
+
 
 ````bash 
 sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev build-essential cmake 
 ```` 
 
 - Optional:
-  - GPU-acceleration with [CUDA](https://developer.nvidia.com/cuda-downloads)  > 10.1
-  - Multi-threading with OpenMP 
+  - GPU-acceleration with [CUDA](https://developer.nvidia.com/cuda-downloads)  (version 10.1 or higher needed)
+  - Multi-threading with OpenMP: 
     ```` sudo apt-get install libomp-dev ````
  
 
 
 
-### Compilation:
+### Compilation
 
 ````bash 
  wget https://github.com/R-Hertel/tetmag/tetmag.git 
@@ -36,18 +38,26 @@ sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev build-essentia
  cmake ..
  make -j$(nproc)
 ````
-## Pre- and Postprocessing:
+
+- Notes:
+    - Installation on other platforms and on other linux distributions should be possible, but hasn't been tested. 
+    - An internet connection is required during the build process.
+
+## Pre- and Postprocessing
+
+The following software is required or recommended to generate input data for tetmag and to analyze the simulation results
 
 - [ParaView](https://www.paraview.org) - Data visualization 
 - [gmsh](https://www.paraview.org/) or [netgen](https://ngsolve.org) - Finite-element mesh generation
 - [FreeCAD](https://www.freecadweb.org) - Design of three-dimensional objects
 
-## Notes
-Compilation on other platforms and on other linux distributions should be possible, but hasn't been tested. 
+## Usage
+ - A user guide is being prepared, and a link will be posted here once it is available. 
+ - See the simulation studies in the [examples directory](https://github.com/R-Hertel/tetmag/tree/main/resources) for a quick introduction to the usage of tetmag.
 
 
 ## Credits
-The tetmag software is powered by:
+The tetmag software is powered by
 - [AMGCL](https://github.com/ddemidov/amgcl) - Iterative solution of sparse systems
 - [SUNDIALS / CVODE](https://github.com/LLNL/sundials) - Solution of ordinary differential equation (ODE) systems
 - [Eigen](https://gitlab.com/libeigen/eigen) - Linear algebra
@@ -57,3 +67,4 @@ The tetmag software is powered by:
 - [CUDA / Thrust](https://developer.nvidia.com/cuda-downloads) - GPU acceleration
 - [boost](https://github.com/boostorg) - Powerful C++ libraries 
 - [CMake](https://github.com/Kitware/CMake) - Build system generator
+
