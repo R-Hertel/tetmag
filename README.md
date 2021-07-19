@@ -66,7 +66,7 @@ The documentation describes the required pre- and postprocessing steps and shows
 ## Credits
 The tetmag software is powered by
 - [AMGCL](https://github.com/ddemidov/amgcl) - Iterative solution of sparse systems
-- [SUNDIALS / CVODE](https://github.com/LLNL/sundials) - Solution of ordinary differential equation (ODE) systems
+- [SUNDIALS / CVODE](https://github.com/LLNL/sundials) - Solution of ordinary differential equation systems
 - [Eigen](https://gitlab.com/libeigen/eigen) - Linear algebra
 - [H2Lib](https://github.com/H2Lib) - Hierarchical matrix data compression
 - [VTK](https://github.com/Kitware/VTK) and [gmsh](https://gitlab.onelab.info/gmsh/gmsh) - I/O of finite-element mesh data
