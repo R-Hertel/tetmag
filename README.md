@@ -5,7 +5,8 @@
 
 
  <img src="https://github.com/R-Hertel/tetmag/blob/main/resources/tetmagLogo_v5.png" width="400" >
-tetmag is a finite-element software for large-scale micromagnetic simulations.
+
+`tetmag` is a finite-element software for large-scale micromagnetic simulations.
 <!--- ![tetmag logo](https://github.com/R-Hertel/tetmag/blob/main/resources/tetmagLogo_v1.png) --->
 
        
@@ -24,7 +25,7 @@ sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev build-essentia
 
 - Optional:
   - GPU-acceleration with [CUDA](https://developer.nvidia.com/cuda-downloads)  (version 10.1 or higher needed)
-  - Multi-threading with OpenMP: 
+  - Multi-threading with [OpenMP](https://www.openmp.org/):
     ```` sudo apt-get install libomp-dev ````
  
 
@@ -43,13 +44,19 @@ sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev build-essentia
     - Installation on other platforms and on other linux distributions should be possible, but hasn't been tested. 
     - An internet connection is required during the build process.
 
-## Pre- and Postprocessing
+## Additional software
+Although `tetmag` is a standalone software that -unlike plugin-type applications- does not require a specific framework to operate, its workflow involves a series of processes that must be handled by other applications. This concerns two categories of operations:
 
-The following software is required or recommended to generate input data for tetmag and to analyze the simulation results:
+- **Preprocessing** - Definition of the sample geometry and finite-element mesh generation
+- **Postprocessing** - Visualization and analysis of the results 
+
+The following software can accomplish these tasks:
 
 - [ParaView](https://www.paraview.org) - Data visualization 
 - [gmsh](https://gmsh.info) or [netgen](https://ngsolve.org) - Finite-element mesh generation
 - [FreeCAD](https://www.freecadweb.org) - Design of three-dimensional objects
+
+The documentation describes the required pre- and postprocessing steps and shows how `tetmag` interacts with this external software. 
 
 ## Usage
  - A user guide is being prepared, and a link will be posted here once it is available. 
