@@ -20,7 +20,7 @@
 
 
 ````bash 
-sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev build-essential cmake 
+sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev libvtk7-dev build-essential cmake 
 ```` 
 
 - Optional:
