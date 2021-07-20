@@ -25,10 +25,6 @@ sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev libvtk7-dev bu
 
 - Optional:
   - GPU-acceleration with [CUDA](https://developer.nvidia.com/cuda-downloads)  (version 10.1 or higher needed)
-  - Multi-threading with [OpenMP](https://www.openmp.org/):
-    ```` sudo apt-get install libomp-dev ````
- 
-
 
 
 ### Compilation
@@ -64,7 +60,7 @@ The documentation describes the required pre- and postprocessing steps and shows
 
 
 ## Credits
-The tetmag software is powered by
+The tetmag software is powered by these awesome projects:
 - [AMGCL](https://github.com/ddemidov/amgcl) - Iterative solution of sparse systems
 - [SUNDIALS / CVODE](https://github.com/LLNL/sundials) - Solution of ordinary differential equation systems
 - [Eigen](https://gitlab.com/libeigen/eigen) - Linear algebra
