@@ -1,0 +1,36 @@
+site_name: tetmag
+site_url: https://readtedocs.tetmag.io/
+docs_dir: tetmag_doc
+
+theme: readthedocs
+
+markdown_extensions:
+  - admonition
+  - def_list
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.smartsymbols
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.critic
+
+
+extra_javascript:
+  - javascripts/config.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+
+nav:
+    - Home: index.md
+    - Installation: installation.md
+    - Getting started: tutorial.md
+    - Examples: examples.md    
+    - Theory: equations.md
+
+use_directory_urls: false
+# ^^ this is needed when opening pages from the file system (not on a site)
