@@ -59,8 +59,6 @@ int main(int argc, char *argv[]) {
     if (argv_s == "--license") printLicense();
     std::exit(0);
   }
-
-  std::exit(0);
   
 	SimulationData sd;
 	MeshData msh;
