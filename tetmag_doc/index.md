@@ -6,7 +6,7 @@ On these length scales, the shape of the samples can have a strong impact on the
 
 The software is designed to solve large-scale problems by exploiting (optional) GPU acceleration, OpenMP parallelization, and an efficient data compression with hierarchical matrices. 
 
-The source code is available under GNU-GPL3 License from the [tetmag repository](https://github.com/R-Hertel/tetmag) on GitHub.
+The source code is available under GNU AFFERO GPL3 License from the [tetmag repository](https://github.com/R-Hertel/tetmag) on GitHub.
 
 ## Referencing
 
