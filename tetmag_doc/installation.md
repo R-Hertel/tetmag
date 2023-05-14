@@ -1,6 +1,6 @@
 # Installation notes for tetmag
 
-This page describes how to compile `tetmag`. The installation guidelines described here refer to **ubuntu 20.04 LTS**. It should be possible to compile `tetmag` also on other Linux distributions, as well as on MacOS, and on Windows (64bit) systems. However, `tetmag` has not yet been tested on systems other than ubuntu.  
+This page describes how to compile `tetmag`. The installation guidelines described here refer to **ubuntu 20.04 LTS**. It should be possible to compile `tetmag` also on other Linux distributions and on Windows (64bit) systems. However, `tetmag` has not yet been tested on systems other than ubuntu and MacOS.  
 
 ## Prerequisites
 
