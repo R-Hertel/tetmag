@@ -1,0 +1,6 @@
+name = Permalloy
+A = 1.3e-11
+Js =  1.0053 # corresponds to 8.0e5 A/m
+Ku =  500  # in J/m^3
+phi_u = 0
+theta_u = 90
