@@ -15,12 +15,16 @@
 
 ### Requirements
 
-- Ubuntu 20.04: 
+- Ubuntu 22.04: 
   Install the following
 
 
 ````bash 
-sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev libvtk7-dev build-essential cmake 
+sudo apt-get install build-essential cmake git wget
+sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev libvtk9-dev 
+sudo apt-get install liblapack-dev libglu1 libpthread-stubs0-dev
+sudo apt-get install libxrender-dev libxcursor-dev libxft-dev libxinerama-dev
+sudo apt-get install qtbase5-dev qtdeclarative5-dev
 ```` 
 
 - Optional:
@@ -37,7 +41,8 @@ sudo apt-get install libboost-all-dev libeigen3-dev libnetcdf-dev libvtk7-dev bu
 ````
 
 - Notes:
-    - Installation on other platforms and on other linux distributions should be possible, but hasn't been tested. 
+    - Installation on Windows and other linux distributions should be possible, but hasn't been tested. 
+    - The software can be compiled and run on MacOS (tested on macOS 13.3.1 with Apple M1 processor) if the required libraries are installed.
     - An internet connection is required during the build process.
 
 ## Additional software
