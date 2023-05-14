@@ -61,7 +61,7 @@ The documentation describes the required pre- and postprocessing steps and shows
 
 ## Usage
  - A user guide is being prepared, and a link will be posted here once it is available. 
- - Examples of simple simulation studies will be added in the [examples directory](https://github.com/R-Hertel/tetmag/tree/main/resources) to provide a quick introduction to the usage of tetmag.
+ - Examples of simple simulation studies will be added in the [examples directory](https://github.com/R-Hertel/tetmag/tree/examples) to provide a quick introduction to the usage of tetmag.
 
 
 ## Credits
