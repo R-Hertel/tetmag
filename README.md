@@ -34,7 +34,7 @@ sudo apt-get install qtbase5-dev qtdeclarative5-dev
 ### Compilation
 
 ````bash 
- wget https://github.com/R-Hertel/tetmag/tetmag.git 
+ git clone https://github.com/R-Hertel/tetmag.git 
  cd tetmag && mkdir build && cd build 
  cmake ..
  make -j$(nproc)
