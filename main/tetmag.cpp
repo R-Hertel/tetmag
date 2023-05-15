@@ -56,8 +56,10 @@ int main(int argc, char *argv[]) {
   
   if (argc > 1) {
     std::string argv_s = argv[1];
-    if (argv_s == "--license") printLicense();
-    std::exit(0);
+    if (argv_s == "--license") {
+	    printLicense();
+	    std::exit(0);
+    }
   }
   
 	SimulationData sd;
