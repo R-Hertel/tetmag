@@ -36,9 +36,6 @@
 #include <string>
 #ifdef USE_CUDA
 #include "GPUSolver.h"
-// #include "ViennaGPUSolver.h"
-// #include <paralution/paralution.hpp>
-// using namespace paralution;
 #endif
 #include "AMGCLSolver.h"
 // #include "ViennaSolver.h"

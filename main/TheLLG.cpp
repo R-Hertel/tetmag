@@ -66,7 +66,7 @@ TheLLG::TheLLG(SimulationData& sd, const MeshData& msh, int LLGVersion) :
 #endif
 	efc = std::make_shared<EffFieldCalc>(sd, msh);
 	odeTime = 0.;
-	refresh_time = 0.1; // replace with user input once it works.
+	refresh_time = 0.1; // ToDo: consider replacing hard-coded value with user input dat 
 	copyTimer.reset();
 	heffTimer.reset();
 	hl.setValueFunction();

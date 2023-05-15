@@ -197,8 +197,6 @@ double EffFieldCalc::exchEnergy_direct(MRef &Mag){
 		exch(i) *= A(i) * NodeVol(i);
 	}
 	return exch.sum() / NodeVol.sum();	
-
-
 }
 
 double EffFieldCalc::dmiEnergy_direct(MRef &Mag)

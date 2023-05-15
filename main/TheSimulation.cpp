@@ -117,10 +117,6 @@ void TheSimulation::start() {
 		integrateOnGPU = prog.integrateOnGPU;
 //		integrateOnGPU = true;
 #ifdef USE_CUDA 
-//	if(prog.solverType == "pl") {
-//		std::cout << "This GPU version of tetmag is powered by PARALUTION." << std::endl;
-//		paralution::init_paralution();
-//	}
 //	if(prog.solverType == "cuda") {
 //			std::cout << "This GPU version of tetmag is powered by AMGCL." << std::endl;
 //	}
@@ -269,8 +265,6 @@ void TheSimulation::start() {
 			odeTimer.start();
 			// switching OFF ODEINT: Choice between CVODE and ODEINT is too complex, and ODEINT is incompatible with THRUST ///
 			prog.useCVODE = true;
-			//	
-// 			prog.useCVODE = false;
 			if (prog.useCVODE) {
 #ifdef USE_CUDA
 				if (sd.useGPU && integrateOnGPU) {
@@ -326,9 +320,7 @@ void TheSimulation::start() {
 		if (prog.writerType == "GMV") {
 			write.outputGMV(msh.name + ".gmr", mag);
 		} else {
-//		write.outputVTK(msh.name, mag);
-//		write.outputVTK(msh.name, mag, demag.calcField(mag), "Magnetization", "Demag"); 
-		write.outputVTK(msh.name, mag, demag.getDivM(mag),"Magnetization", "div M");
+		write.outputVTK(msh.name, mag, demag.calcField(mag), "Magnetization", "Demag"); 
 		}
 
 		if (sd.Hys) {
@@ -388,10 +380,6 @@ void TheSimulation::displayEnergies(double real_t) {
 			<< (std::abs(ExchangeEnergy) < 1.e-7 ? 0 : ExchangeEnergy)
 			<< " un: " << UniaxialEnergy << " ze: "
 			<< ZeemanEnergy << " cb: " << CubicEnergy << " sf: " << SurfaceEnergy << " dm: " << DMIEnergy 			
-/*			
-			<< " dmi2: " << directDMI 
-			<< " exc2: " << directExch
-*/			
 			<< "\tM: " << std::setprecision(5) << getMeanM().transpose() 
 			<< std::endl; 
 }
@@ -406,11 +394,7 @@ void TheSimulation::calculateEnergies( TheLLG& LLG, DemagField& demag, bool calc
 	SurfaceEnergy  = LLG.getSurfaceAnisotropyEnergy(mag) / totalVolume;
 	DMIEnergy 	   = LLG.getDMIEnergy(mag) / totalVolume;
 	totalEnergy = DemagEnergy + ExchangeEnergy + UniaxialEnergy + ZeemanEnergy + CubicEnergy + SurfaceEnergy + DMIEnergy;
-	meanH 		=	LLG.getMeanH();
-/*
-	directDMI	=	LLG.getDirectDMI(mag);
-	directExch	=	LLG.getDirectExch(mag);
-*/	
+	meanH 		=	LLG.getMeanH();	
 }
 
 void TheSimulation::generateInitialConfiguration() {

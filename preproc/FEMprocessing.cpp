@@ -80,7 +80,6 @@ std::vector<std::string> splitString(std::string sysOutput) {
 }
 
 
-
 PreprocessMesh::PreprocessMesh(MeshData& msh_) :
 		nx(msh_.xyz.rows()),
 		ntet(msh_.fel.rows()),
@@ -96,15 +95,12 @@ PreprocessMesh::PreprocessMesh(MeshData& msh_) :
 
 void PreprocessMesh::prepareAllMatrices() {
 	calculateVolumes();
-//	preprocessBoundaryElements();
 	calcShapeFuncGrads();
 	calculateGradientOperators();
 	gradOpX.makeCompressed();
 	gradOpY.makeCompressed();
 	gradOpZ.makeCompressed();
 
-// 	testGradientOperators();
-//	calculateTransposeGradientOperators();
 	tGradOpX.makeCompressed();
 	tGradOpY.makeCompressed();
 	tGradOpZ.makeCompressed();
@@ -119,9 +115,6 @@ void PreprocessMesh::prepareAllMatrices() {
 	msh.tGradY = tGradOpY;
 	msh.tGradZ = tGradOpZ;
 	msh.stiff = stiff;
-//	checkIfSingular();
-//	msh.DirNodes = getDirichletNodes();  // not used at the moment.
-//	msh.DirVals = getDirichletValues();
 	prepareDirichletMatrix();
 }
 
@@ -169,8 +162,6 @@ VectorXi PreprocessMesh::getDirichletNodes(){
 	VectorXi EigenDirichletNodes = Map<VectorXi>(DirichletNodes.data(), DirichletNodes.size());
 	return EigenDirichletNodes;
 }
-
-
 
 
 double PreprocessMesh::signedTetrahedronVolume6(const Vector3d& p1, const Vector3d& p2, const Vector3d& p3, const Vector3d& p4) {
@@ -224,7 +215,7 @@ void PreprocessMesh::calcShapeFuncGrads() {
 			ShapeFuncGradX(el, n) = grad_sign * gradMatX.determinant() / V6;
 			ShapeFuncGradY(el, n) = grad_sign * gradMatY.determinant() / V6;
 			ShapeFuncGradZ(el, n) = grad_sign * gradMatZ.determinant() / V6;
-		}
+			}
 		}
 	}
 }

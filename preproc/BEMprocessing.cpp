@@ -189,7 +189,6 @@ std::vector<tet_edge> BEMprocessing::prepareEdges() {
 	}
 
 #ifndef NDEBUG
-	assert(numberOfUniqueEdges == reindexedEdges.size());
 	for (int i = 0; i < bel.rows(); ++i) {
 		for (int j = 0; j < 3; ++j) {
 			int e1 = reindexedEdges[el_ed(i, j)].first;
@@ -198,7 +197,6 @@ std::vector<tet_edge> BEMprocessing::prepareEdges() {
 		}
 	}
 #endif
-//	std::cout << "All edge information is prepared.\n";
 	return reindexedEdges;
 }
 

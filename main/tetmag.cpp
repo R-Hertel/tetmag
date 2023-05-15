@@ -116,9 +116,8 @@ exit(0);
 	PreprocessMesh preproc(msh);
 	preproc.prepareAllMatrices();
 //	preproc.checkVolumes();
-	msh = preproc.getMeshData(); // copy of the sparse matrices calculated in preproc
+	msh = preproc.getMeshData(); 
 	msh.preprocessBEM(prog.useH2);
-//	std::cout << "FEM preprocessing completed." << std::endl;
 
 // problem specification
 	msh.ascribeMaterialsToNodes();
@@ -129,14 +128,13 @@ exit(0);
 	sd.readLocalFieldProfile();
 
 // simulation
-	TheSimulation sim(sd, msh, prog); // why do we still need "prog" here?
+	TheSimulation sim(sd, msh, prog); 
 	sim.generateInitialConfiguration();
 	timer.start();
 	sim.start();
 	if (prog.useH2) { deleteHmatrices(); }
 	timer.end();
 	timer.printDuration();
-
 	return 0;
 }
 
