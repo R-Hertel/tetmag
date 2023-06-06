@@ -6,7 +6,7 @@
 
  <img src="https://github.com/R-Hertel/tetmag/blob/main/resources/tetmagLogo_v5.png" width="400" >
 
-`tetmag` is a finite-element software for large-scale micromagnetic simulations.
+`tetmag` is a finite-element software forgeneral-purpose micromagnetic simulations.
 <!--- ![tetmag logo](https://github.com/R-Hertel/tetmag/blob/main/resources/tetmagLogo_v1.png) --->
 
        
