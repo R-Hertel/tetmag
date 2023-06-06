@@ -43,7 +43,7 @@ sudo apt-get install qtbase5-dev qtdeclarative5-dev
 - Notes:
     - Installation on Windows and other linux distributions should be possible, but hasn't been tested. 
     - The software can be compiled and run on MacOS (tested on macOS 13.3.1 with Apple M1 processor) if the required libraries are installed.
-    - An internet connection is required during the build process.
+    - An internet connection is necessary during the build process.
 
 ## Additional software
 Although `tetmag` is a standalone software that -unlike plugin-type applications- does not require a specific framework to operate, its workflow involves a series of processes that must be handled by other applications. This concerns two categories of operations:
