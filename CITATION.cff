@@ -1,0 +1,17 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: tetmag
+message: >-
+  a finite-element software for general-purpose
+  micromagnetic simulations
+type: software
+authors:
+  - given-names: Riccardo
+    family-names: Hertel
+    email: riccardo.hertel@ipcms.unistra.fr
+    affiliation: CNRS - IPCMS and Université Strasbourg
+    orcid: 'https://orcid.org/0000-0002-0646-838X'
+repository-code: 'https://github.com/R-Hertel/tetmag'
+license: AGPL-3.0
