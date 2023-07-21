@@ -14,4 +14,3 @@ Here ``<name>`` is the name of your simulation project. The first two files are 
 
 The following sections will provide a few examples with a step-by-step description on how to conduct various simulations with ``tetmag``, thereby demonstrating the use and importance of these input files. The examples will also discuss how the computed output files can be analyzed.
 
-The source code is available under AGPL-3.0 license at https://github.com/R-Hertel/tetmag .

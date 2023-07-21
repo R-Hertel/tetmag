@@ -17,6 +17,9 @@ By exploiting advanced data compression methods, highly efficient solvers and
 integrators, as well as GPU acceleration, tetmag is suitable for
 high-performance computations and large-scale micromagnetic simulations.
 
+The source code is available under AGPL-3.0 license at https://github.com/R-Hertel/tetmag .
+
+
 .. toctree::
    :maxdepth: 2
 
