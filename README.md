@@ -13,6 +13,7 @@
 
 ## Installation
 
+
 ### Requirements
 
 - For ubuntu 22.04: 
@@ -30,6 +31,7 @@ sudo apt-get install qtbase5-dev qtdeclarative5-dev
 - Optional:
   - GPU-acceleration with [CUDA](https://developer.nvidia.com/cuda-downloads)  (version 10.1 or higher needed)
 
+For more detailed installation instructions, see the `tetmag` [documentation.](https://tetmag.readthedocs.io/en/latest/usage/installation.html)
 
 ### Compilation
 
