@@ -55,7 +55,8 @@ Material MaterialReader::readMaterialFromFiles(size_t i) {
 	desc.add_options()
 	("name",opt::value<std::string>()->default_value(file.substr(0, file.size() - 4)), "Name of material")
 	("A", opt::value<double>()->required(), "Exchange constant")
-	("Js", opt::value<double>()->required(), "Saturation polarization [T], equal to mu0*Ms")
+	("Js", opt::value<double>(), "Saturation polarization [T], equal to mu0*Ms")
+	("Ms", opt::value<double>(), "Saturation magnetization [A/m]")
 	("Ku", opt::value<double>()->default_value(0.),	"Uniaxial anisotropy constant")
 	("phi_u", opt::value<double>()->default_value(0.), "azimuth angle of uniaxial anisotropy axis")
 	("theta_u", opt::value<double>()->default_value(0.), "polar angle of uniaxial anisotropy axis")
@@ -84,6 +85,12 @@ Material MaterialReader::readMaterialFromFiles(size_t i) {
 	if (vm.count("name")) mat.desc =vm["name"].as<std::string>();
 	if (vm.count("A")) mat.A = vm["A"].as<double>();
 	if (vm.count("Js")) mat.Js = vm["Js"].as<double>();
+	if (!vm.count("Ms") && !vm.count("Js")) {
+		std::cout << "Information on Ms is missing. Please provide data for the spontaneous magnetization." << std::endl;
+		exit(1);
+		}
+
+	if (vm.count("Ms")) mat.Js = vm["Ms"].as<double>() * PhysicalConstants::mu0 ;
 	if (vm.count("Ku"))	mat.Ku = vm["Ku"].as<double>();
 	if (vm.count("phi_u")) mat.phi_u = vm["phi_u"].as<double>();
 	if (vm.count("theta_u")) mat.theta_u = vm["theta_u"].as<double>();
