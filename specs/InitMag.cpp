@@ -202,7 +202,7 @@ MatrixXd InitialConfig::SetInitialConfiguration() {
 		break;
 	case Vortex_xy: {
 		int nx = xyz.rows();
-		double core_rad = 0.1;
+		double core_rad = 2;
 		Vector2d center;
 		center << 0., 0.;
 		Vector2d pos;
@@ -216,8 +216,8 @@ MatrixXd InitialConfig::SetInitialConfiguration() {
 				mag(i, y) = 0.;
 				mag(i, z) = 1.;
 			} else {
-				mag(i, x) = d(y);
-				mag(i, y) = -d(x);
+				mag(i, x) = -d(y);
+				mag(i, y) = d(x);
 				mag(i, z) = 0;
 				mag.row(i).normalize();
 			}
