@@ -1,0 +1,14 @@
+name = sp4_
+scale = 1.e-9
+mesh type = vtk
+alpha = 0.02
+initial state = fromfile_sp4_s-state.vtu
+time step = 0.1 # demag refresh interval in ps
+duration = 1000  # simulation time in ps
+solver type = cpu
+
+external field = 25.0 #  Hext in mT
+    theta_H = 90 # polar angle of the field direction in degree
+    phi_H = 170 # azimuthal angle
+
+config stride = 10

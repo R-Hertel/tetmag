@@ -1,0 +1,15 @@
+name = sp_stt
+scale = 1.e-9
+mesh type = vtk
+alpha = 0.1
+initial state = fromfile_sp_stt_vortex.vtu
+time step = 0.1 
+duration = 14000  
+solver type = gpu
+
+current type = dc 
+        spin polarization = 1.0 # degree of spin polarization in stt dynamics
+        current density =  1.0 # current density for STT dynamics [in 10^12 A/m^2] 
+        beta = 0.05 # non-adiabaticity parameter in STT term (also known as xi)
+        current theta = 90 # polar angle of electric current flow [in degrees]
+        current phi = 0 # azimuthal angle of electric current flow [in degrees]

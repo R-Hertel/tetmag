@@ -1,0 +1,18 @@
+name = sp4_
+scale = 1.e-9
+mesh type = vtk
+alpha = 1.0
+initial state = homogeneous_x 
+time step = 0.5 # demag refresh interval in ps
+torque limit = 5e-4
+duration = 5000  # simulation time in ps
+solver type = gpu
+
+hysteresis = yes
+   initial field = 1000 # first field value of hysteresis branch, in mT
+   final field = 0 # last field of hysteresis branch, in mT
+   field step = 200 # step width of increment / decrement in mT
+   hys theta = 45 # polar angles of magnetic hysteresis field [deg]
+   hys phi = 45 # azimuthal angles of magnetic hysteresis field [deg]
+
+remove precession = yes
