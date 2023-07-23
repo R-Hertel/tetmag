@@ -1,4 +1,4 @@
-![Github All Releases](https://img.shields.io/github/downloads/R-Hertel/tetmag/total?style=plastic)
+[![Documentation Status](https://readthedocs.org/projects/tetmag/badge/?
 ![GitHub Forks](https://img.shields.io/github/forks/R-Hertel/tetmag?style=plastic)
 ![GitHub Stars](https://img.shields.io/github/stars/R-Hertel/tetmag?style=plastic)
 ![GitHub Release Date](https://img.shields.io/github/release-date/R-Hertel/tetmag?style=plastic)
