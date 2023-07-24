@@ -39,6 +39,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include "auxiliaries.h"
+#include "PhysicalConstants.h"
 
 Material MaterialReader::readMaterialFromFiles(size_t i) {
 	std::string file = getMaterialFileName(i+1);

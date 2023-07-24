@@ -1,1 +1,8 @@
 .vscode
+build/
+*~
+lib/
+external/amgcl/
+external/sundials/
+external/gmsh/
+external/h2lib/
