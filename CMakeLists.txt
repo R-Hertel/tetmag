@@ -23,13 +23,14 @@
 cmake_minimum_required(VERSION 3.13)
 set(CMAKE_CXX_STANDARD 14)
 
-project(tetmag VERSION 1.7.3 LANGUAGES C CXX)
+project(tetmag VERSION 1.7.4 LANGUAGES C CXX)
 # These options can be set with ccmake or with cmake -D 
 option(TETMAG_USE_OPENMP "Compile with OpenMP" ON)
 option(TETMAG_USE_CUDA "Enable CUDA" ON)
 option(TETMAG_FIND_CUDA_ARCH "Autodetect available GPU architectures" ON)
-set(TETMAG_HOST_COMPILER "/usr/bin/g++-7" CACHE FILEPATH "CUDA-compatible host compiler") 
-# ^^^ select host compiler version that is compatible with installed CUDA version.
+set(TETMAG_SET_CUDA_ARCHS "61;75" CACHE STRING "manually set GPU architectures")
+set(TETMAG_HOST_COMPILER "/usr/bin/g++" CACHE FILEPATH "CUDA-compatible host compiler") 
+# ^^^ select host compiler version that is compatible with the installed CUDA version.
 # (see https://gist.github.com/ax3l/9489132 )
 
 if (APPLE)
