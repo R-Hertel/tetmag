@@ -68,8 +68,7 @@ CUDA
 Installing the `CUDA toolkit <https://developer.nvidia.com/cuda-downloads>`_ is optional, but recommended. The toolkit offers the possibility to accelerate the simulations by performing a large portion of the computations on the graphical processing unit (GPU) rather than on the CPU, which can result in significantly increased computation speeds, especially in the case of large-scale problems.
 For this feature, the system requires a CUDA-capable GPU, and the CUDA SDK must be installed. By deault, ``tetmag`` runs on the CPU. The GPU option is activated by adding an entry ``solver type = gpu`` in an input file, as discussed in the :ref:`examples <example1>` section.
 
-Although ubuntu offers repository packages for CUDA (:code:`apt-get install nvidia-cuda-toolkit`), it is preferable to install a CUDA version provided the NVIDIA website. 
-We recommend using version 10.2 or higher. The NVIDIA site from which the CUDA Toolkit can be downloaded provides a simple installer and `detailed installation instructions <https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html>`_. Note that the system must be rebooted after the installation process.
+Although ubuntu offers repository packages for CUDA (:code:`apt-get install nvidia-cuda-toolkit`), it is preferable to install a CUDA version provided the NVIDIA website. We recommend using version 10.2 or higher. The NVIDIA site from which the `CUDA Toolkit <https://developer.nvidia.com/cuda-downloads>`_ can be downloaded provides a simple installer and `detailed installation instructions <https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html>`_. Note that the system must be rebooted after the installation process.
 
 tetmag compilation
 ------------------
