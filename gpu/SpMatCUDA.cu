@@ -116,7 +116,7 @@ void SpMatCUDA::setOnDev() {
   // prepare buffer:
   status = cusparseSpMV_bufferSize( handle, CUSPARSE_OPERATION_TRANSPOSE,
 				   &alpha, matA, vecX, &beta, vecY, CUDA_R_64F,
-				   CUSPARSE_MV_ALG_DEFAULT, &bufferSize) ;
+				   CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize) ;
   checkStatusCusparse(status);
   cudaMalloc(&dBuffer, bufferSize);
 }
@@ -125,7 +125,7 @@ void SpMatCUDA::setOnDev() {
 void SpMatCUDA::mvp() {
   cusparseStatus_t stat = cusparseSpMV(handle, CUSPARSE_OPERATION_TRANSPOSE,
 				       &alpha, matA, vecX, &beta, vecY, CUDA_R_64F,
-				       CUSPARSE_MV_ALG_DEFAULT, dBuffer);
+				       CUSPARSE_SPMV_ALG_DEFAULT, dBuffer);
 //  checkStatusCusparse(stat);
 }
 
