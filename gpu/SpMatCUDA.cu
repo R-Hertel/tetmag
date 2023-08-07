@@ -32,6 +32,7 @@
 #include "SpMatCUDA.h"
 #include <iostream>
 #include <vector>
+#include <cuda_runtime_api.h>
 
 using namespace Eigen;
 // typedef SparseMatrix<double, ColMajor> SpMat_CM;
@@ -116,7 +117,12 @@ void SpMatCUDA::setOnDev() {
   // prepare buffer:
   status = cusparseSpMV_bufferSize( handle, CUSPARSE_OPERATION_TRANSPOSE,
 				   &alpha, matA, vecX, &beta, vecY, CUDA_R_64F,
+#if (CUDART_VERSION > 11000)
 				   CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize) ;
+#else
+                                   CUSPARSE_MV_ALG_DEFAULT, &bufferSize) ;
+#endif
+  
   checkStatusCusparse(status);
   cudaMalloc(&dBuffer, bufferSize);
 }
@@ -125,7 +131,11 @@ void SpMatCUDA::setOnDev() {
 void SpMatCUDA::mvp() {
   cusparseStatus_t stat = cusparseSpMV(handle, CUSPARSE_OPERATION_TRANSPOSE,
 				       &alpha, matA, vecX, &beta, vecY, CUDA_R_64F,
-				       CUSPARSE_SPMV_ALG_DEFAULT, dBuffer);
+#if (CUDART_VERSION > 11000)
+				   CUSPARSE_SPMV_ALG_DEFAULT, dBuffer) ;
+#else
+                                   CUSPARSE_MV_ALG_DEFAULT, dBuffer) ;
+#endif
 //  checkStatusCusparse(stat);
 }
 
