@@ -57,9 +57,6 @@
 #include "Timer.h"
 #include <memory>
 
-# if SUNDIALS_VERSION_MAJOR < 6 && SUNDIALS_VERSION_MINOR < 2 
-# define OLD_CVODE_VERSION
-# endif
 
 
 struct UserData;

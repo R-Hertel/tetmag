@@ -67,18 +67,11 @@ dev_vec TheLLG::sttDynamics_GPU(const dev_vec &mag_vec) {
 }
 
 Eigen::MatrixXd TheLLG::effFieldsForGPU(const dev_vec &mag_vec) {
-// This should be improved. There are too many copy operations.	
-// An overlaod of evaluateAllEffectiveFields() could be prepared
-// that would take a device vector as argument.
-
 	std::vector<double> mag_vec_h(3 * nx);
 	thrust::copy(mag_vec.begin(), mag_vec.end(), mag_vec_h.begin());
 	Eigen::Map<const MatrixXd_CM> Mag(mag_vec_h.data(), nx, 3);
 	evaluateAllEffectiveFields(Mag);
 	return totalEffectiveField();
-// One should further check if it is necessary to return MatrixXd 
-// in the individual field calculations. 
-// It should be possible to leave the data on the device.
 }
 
 dev_vec TheLLG::classicVersion_GPU(const dev_vec &mag_vec) {
@@ -86,7 +79,6 @@ dev_vec TheLLG::classicVersion_GPU(const dev_vec &mag_vec) {
 	Heff = effFieldsForGPU(mag_vec);
 	return *gpucalc->ClassicLLG_dev(Heff, alpha);
 }
-
 
 dev_vec TheLLG::noPrecession_GPU(const dev_vec &mag_vec) {
 	gpucalc->setMagDev(mag_vec);
@@ -113,35 +105,35 @@ void TheLLG::operator()(const thrust::device_vector<double>& mag_d, thrust::devi
 	dxdt_d = selectedLLGType_GPU(mag_d);
 }
 
-
 void TheLLG::selectLLGTypeGPU(int choice) {
 	enum choices { noPrec , usualLLG , STT };
 	useSTT = false;
-		if (choice == noPrec) {
-			selectedLLGType_GPU = [this](const dev_vec &m) -> dev_vec { return noPrecession_GPU(m); };
+	if (choice == noPrec) {
+		selectedLLGType_GPU = [this](const dev_vec &m) -> dev_vec { return noPrecession_GPU(m); };
 		} else if (choice == STT ) {
 			useSTT = true;
 			selectedLLGType_GPU = [this](const dev_vec &m) -> dev_vec { return sttDynamics_GPU(m); };
 		} else	{
-			selectedLLGType_GPU = [this](const dev_vec &m) -> dev_vec {	return classicVersion_GPU(m); };
+			selectedLLGType_GPU = [this](const dev_vec &m) -> dev_vec { return classicVersion_GPU(m); };
 		}
 }
 
-
 int TheLLG::IntegrateOnGPU(std::vector<double>& mag_vec, double ode_start_t, double ode_end_t, double dt ) {
-// Not referenced any more. Used to be called from TheSimulation::start() but was removed due to THRUST / ODEINT incompatibility
-	std::reference_wrapper<TheLLG>  LLGRef = std::ref(*this);
+// Not referenced any more. Used to be called from TheSimulation::start(), but was removed due to THRUST / ODEINT incompatibility
+// For this to work, ODEINT would need to be patched as described here: 
+// 		https://github.com/boostorg/odeint/pull/46/files 
+// 		https://github.com/boostorg/odeint/issues/45
+	std::reference_wrapper<TheLLG> LLGRef = std::ref(*this);
 	copyTimer.start();
 	mag_vec_tmp = mag_vec; // copy to device vector
-    copyTimer.add();
-//    int its = boost::numeric::odeint::integrate<double>(LLGRef, mag_vec_tmp, ode_start_t, ode_start_t + ode_end_t, dt );
-    copyTimer.start();
-    thrust::copy(mag_vec_tmp.begin(), mag_vec_tmp.end(), mag_vec.begin());
-    copyTimer.add();
+	copyTimer.add();
+//	int its = boost::numeric::odeint::integrate<double>(LLGRef, mag_vec_tmp, ode_start_t, ode_start_t + ode_end_t, dt );
+	copyTimer.start();
+	thrust::copy(mag_vec_tmp.begin(), mag_vec_tmp.end(), mag_vec.begin());
+	copyTimer.add();
 //    return its;
 	return 0;
 }
-
 
 int TheLLG::gpuODE(std::vector<double>& mag_vec, double ode_start_t, double ode_end_t, double dt ) {
 	(void) dt;
@@ -149,45 +141,44 @@ int TheLLG::gpuODE(std::vector<double>& mag_vec, double ode_start_t, double ode_
 	std::shared_ptr<UserData> data = alloc_user_data(nx);
 	int flag;
 	sunindextype N = 3 * nx;
-    copyTimer.start();
-//
-//	int* major = (int*)malloc(sizeof(int));
-//	int* minor = (int*)malloc(sizeof(int)); 
-//	int* patch = (int*)malloc(sizeof(int));
-//	int major ;
-//	int minor ;
-//	int patch ;
-//	int len;
-//	char label;
-//	char* label = (char *)malloc( 20 *sizeof(char));;
-//	SUNDIALSGetVersionNumber(major, minor, patch, label, len);
-//	int SUNDIALSGetVersionNumber(major, minor, 	patch, 	&label, len);
-//	std::cout << "CVODE version : " << major << "." << minor << "." << patch << std::endl;
-//	std::exit(1);
-//	
-
+	copyTimer.start();
+	//
+	//	int* major = (int*)malloc(sizeof(int));
+	//	int* minor = (int*)malloc(sizeof(int));
+	//	int* patch = (int*)malloc(sizeof(int));
+	//	int major ;
+	//	int minor ;
+	//	int patch ;
+	//	int len;
+	//	char label;
+	//	char* label = (char *)malloc( 20 *sizeof(char));;
+	//	SUNDIALSGetVersionNumber(major, minor, patch, label, len);
+	//	int SUNDIALSGetVersionNumber(major, minor, 	patch, 	&label, len);
+	//	std::cout << "CVODE version : " << major << "." << minor << "." << patch << std::endl;
+	//	std::exit(1);
+	//
 
 	mag_vec_tmp = mag_vec;  // copy to thrust::device_vector
-#ifndef OLD_CVODE_VERSION
-	SUNContext sunctx; 
-    SUNContext_Create(NULL, &sunctx); 
-	N_Vector m_gpu = N_VMake_Cuda(N, mag_vec.data(), thrust::raw_pointer_cast(mag_vec_tmp.data()), sunctx); 
-#else	
-    N_Vector m_gpu = N_VMake_Cuda(N, mag_vec.data(), thrust::raw_pointer_cast(mag_vec_tmp.data())); 
-#endif	
-    copyTimer.add();
+	#ifdef USE_CVODE_5
+	N_Vector m_gpu = N_VMake_Cuda(N, mag_vec.data(), thrust::raw_pointer_cast(mag_vec_tmp.data()));
+#else
+	SUNContext sunctx;
+	SUNContext_Create(NULL, &sunctx);
+	N_Vector m_gpu = N_VMake_Cuda(N, mag_vec.data(), thrust::raw_pointer_cast(mag_vec_tmp.data()), sunctx);
+#endif
+	copyTimer.add();
 
 // copy to N_V
 //	cudaMemcpy(mdata, thrust::raw_pointer_cast(mag3_d.data()), N * sizeof(realtype), cudaMemcpyDeviceToDevice);
-	void *cvode_mem = NULL;	
-	#ifndef OLD_CVODE_VERSION
-		cvode_mem = CVodeCreate(CV_ADAMS, sunctx); 
-	#else
-		cvode_mem = CVodeCreate(CV_ADAMS); 
-	#endif
+	void *cvode_mem = NULL;
+#ifdef USE_CVODE_5
+	cvode_mem = CVodeCreate(CV_ADAMS);
+#else
+	cvode_mem = CVodeCreate(CV_ADAMS, sunctx);
+#endif
 //	cvode_mem = CVodeCreate(CV_BDF);
 	flag = CVodeInit(cvode_mem, rhs_d, ode_start_t, m_gpu);
-	
+
 	// CV_BDF configuration:
 	//	realtype abstol = 1.e-8;
 	//	realtype reltol = 1.e-5;
@@ -199,11 +190,11 @@ int TheLLG::gpuODE(std::vector<double>& mag_vec, double ode_start_t, double ode_
 	flag = CVodeSetUserData(cvode_mem, data.get());
 
 	SUNLinearSolver LS;
-	#if OLD_CVODE_VERSION
-		LS = SUNLinSol_SPGMR(m_gpu, PREC_NONE, 0); 	
-	#else		
-		LS = SUNLinSol_SPGMR(m_gpu, PREC_NONE, 0, sunctx); 	
-	#endif
+#ifdef USE_CVODE_5
+	LS = SUNLinSol_SPGMR(m_gpu, PREC_NONE, 0);
+#else
+	LS = SUNLinSol_SPGMR(m_gpu, PREC_NONE, 0, sunctx);
+#endif
 	flag = CVodeSetLinearSolver(cvode_mem, LS, NULL);
 
 	realtype tout = ode_end_t + ode_start_t;
@@ -219,20 +210,19 @@ int TheLLG::gpuODE(std::vector<double>& mag_vec, double ode_start_t, double ode_
 	thrust::copy(res_p, res_p + N, mag_vec_tmp.begin()); // copy from N_V
 	thrust::copy(mag_vec_tmp.begin(), mag_vec_tmp.end(), mag_vec.begin()); // copy to std::vector -- returned by ref.
 	copyTimer.add();
-//  The magnetization needs to be transfered to EffFieldGPU in order to calculate max.torque
+	//  The magnetization needs to be transfered to EffFieldGPU in order to calculate max.torque
 	gpucalc->setMagDev(mag_vec_tmp);
-//	N_VCopyFromDevice_Cuda(m);
-//	double * res_p = N_VGetHostArrayPointer_Cuda(m);
-//	thrust::copy(res_p, res_p + N, mag_vec.begin());
+	//	N_VCopyFromDevice_Cuda(m);
+	//	double * res_p = N_VGetHostArrayPointer_Cuda(m);
+	//	thrust::copy(res_p, res_p + N, mag_vec.begin());
 	N_VDestroy_Cuda(m_gpu);
 	CVodeFree(&cvode_mem);
 	SUNLinSolFree(LS);
-	#ifndef OLD_CVODE_VERSION
-		SUNContext_Free(&sunctx); 
-	#endif 
+#ifndef USE_CVODE_5
+	SUNContext_Free(&sunctx);
+#endif
 	return its;
 }
-
 
 int TheLLG::rhs_d(realtype t, N_Vector u, N_Vector u_dot, void *user_data) {
 	(void) t;

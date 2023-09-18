@@ -277,6 +277,10 @@ void TheSimulation::start() {
 #endif
 			} else {
 ///// REMOVING GPU INTEGRATION WITH ODEINT (INCOMPATIBILITY THRUST / BOOST) ////
+//
+//   To operate correctly with GPU, ODEINT needs to be patched; see: 
+//   https://github.com/boostorg/odeint/issues/45 
+//   https://github.com/boostorg/odeint/pull/46/files
 /*
 #ifdef USE_CUDA 
 				if (sd.useGPU && integrateOnGPU) {
@@ -286,7 +290,6 @@ void TheSimulation::start() {
 */
 					total_its += LLG.IntegrateODEINT(mag_vec, ode_start_t, ode_end_t, dt);
 //#ifdef USE_CUDA 
-////// 
 //				}
 //#endif
 			}
@@ -390,9 +393,9 @@ void TheSimulation::calculateEnergies( TheLLG& LLG, DemagField& demag, bool calc
 	ExchangeEnergy = LLG.getExchangeEnergy(mag) / totalVolume;
 	UniaxialEnergy = LLG.getUniaxialAnisotropyEnergy(mag) / totalVolume;
 	ZeemanEnergy   = LLG.getZeemanEnergy(mag) / totalVolume;
-	CubicEnergy	   = LLG.getCubicAnisotropyEnergy(mag) / totalVolume;
+	CubicEnergy    = LLG.getCubicAnisotropyEnergy(mag) / totalVolume;
 	SurfaceEnergy  = LLG.getSurfaceAnisotropyEnergy(mag) / totalVolume;
-	DMIEnergy 	   = LLG.getDMIEnergy(mag) / totalVolume;
+	DMIEnergy      = LLG.getDMIEnergy(mag) / totalVolume;
 	totalEnergy = DemagEnergy + ExchangeEnergy + UniaxialEnergy + ZeemanEnergy + CubicEnergy + SurfaceEnergy + DMIEnergy;
 	meanH 		=	LLG.getMeanH();	
 }

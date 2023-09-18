@@ -597,20 +597,20 @@ int TheLLG::integrateSUNDIALS(std::vector<double>& mag_vec, double ode_start_t, 
 	sunindextype N = 3 * nx;
 	N_Vector m;
 	copyTimer.start();
-#ifndef OLD_CVODE_VERSION	
+#ifndef USE_CVODE_5
 	SUNContext sunctx; 
     SUNContext_Create(NULL, &sunctx);
 # endif	
 #ifdef _OPENMP
     int num_threads = omp_get_max_threads();
 //	 int num_threads = omp_get_num_threads();	
-	#if OLD_CVODE_VERSION	
+	#ifdef USE_CVODE_5
 		m = N_VMake_OpenMP(N, mag_vec.data(), num_threads); 
 	#else			
 		m = N_VMake_OpenMP(N, mag_vec.data(), num_threads, sunctx); 
 	#endif	
 #else	
-	#if OLD_CVODE_VERSION
+	#ifdef USE_CVODE_5
 		m = N_VMake_Serial(N, mag_vec.data()); 	
 	#else
 		m = N_VMake_Serial(N, mag_vec.data(), sunctx); 		
@@ -618,7 +618,7 @@ int TheLLG::integrateSUNDIALS(std::vector<double>& mag_vec, double ode_start_t, 
 #endif
 	copyTimer.add();
 	void *cvode_mem = NULL;
-	#if OLD_CVODE_VERSION	
+	#ifdef USE_CVODE_5
 		cvode_mem = CVodeCreate(CV_ADAMS);
 	#else
 		cvode_mem = CVodeCreate(CV_ADAMS, sunctx); 		
@@ -636,7 +636,7 @@ int TheLLG::integrateSUNDIALS(std::vector<double>& mag_vec, double ode_start_t, 
 
 	SUNLinearSolver LS;
 	// LS = SUNSPGMR(m, 0, 0);	
-	#if OLD_CVODE_VERSION
+	#ifdef USE_CVODE_5
 		LS = SUNLinSol_SPGMR(m, PREC_NONE, 0); 	
 	#else 
 		LS = SUNLinSol_SPGMR(m, PREC_NONE, 0, sunctx); 		
@@ -649,7 +649,6 @@ int TheLLG::integrateSUNDIALS(std::vector<double>& mag_vec, double ode_start_t, 
 	CVodeGetNumNonlinSolvIters(cvode_mem, &its_nl);
 	CVodeGetNumLinIters(cvode_mem, &its_l);
 	int its = static_cast<int>(its_nl + its_l);
-//	std::cout << "its = " << its; // << std::endl;
 
 	realtype* res_p = N_VGetArrayPointer(m);
 	copyTimer.start();
@@ -663,7 +662,7 @@ int TheLLG::integrateSUNDIALS(std::vector<double>& mag_vec, double ode_start_t, 
 #endif
 	CVodeFree(&cvode_mem);
 	SUNLinSolFree(LS);
-	#ifndef OLD_CVODE_VERSION
+	#ifndef USE_CVODE_5
 		SUNContext_Free(&sunctx); 
 	#endif
 	return its;

@@ -28,6 +28,7 @@ project(tetmag VERSION 1.7.5 LANGUAGES C CXX)
 option(TETMAG_USE_OPENMP "Compile with OpenMP" ON)
 option(TETMAG_USE_CUDA "Enable CUDA" ON)
 option(TETMAG_FIND_CUDA_ARCH "Autodetect available GPU architectures" ON)
+option(TETMAG_USE_CVODE_5 "Use CVODE v5 instead of latest release" OFF)
 set(TETMAG_SET_CUDA_ARCHS "61;75" CACHE STRING "manually set GPU architectures")
 set(TETMAG_HOST_COMPILER "/usr/bin/g++" CACHE FILEPATH "CUDA-compatible host compiler") 
 # ^^^ select host compiler version that is compatible with the installed CUDA version.
@@ -96,6 +97,9 @@ configure_file(${PROJECT_SOURCE_DIR}/main/tetmagVersion.h.in ${PROJECT_SOURCE_DI
 #string(APPEND CMAKE_CXX_FLAGS_RELEASE " -DEIGEN_USE_BLAS")
 #string(APPEND CMAKE_CXX_FLAGS_RELEASE " -pg")
 
+if (TETMAG_USE_CVODE_5)
+  add_compile_definitions(USE_CVODE_5)
+endif() 
 
 if (CMAKE_BUILD_TYPE MATCHES Release)
   #string(APPEND CMAKE_CXX_FLAGS_RELEASE " -mavx " ) # not compatible with CUDA

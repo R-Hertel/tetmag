@@ -89,12 +89,21 @@ FetchContent_MakeAvailable(amgcl)
 # Install CVODE
 
 include(FetchContent)
-FetchContent_Declare(cvode
-  GIT_REPOSITORY https://github.com/LLNL/sundials.git 
-  GIT_TAG main
-  GIT_SHALLOW true
-  GIT_PROGRESS true
-  )
+if(TETMAG_USE_CVODE_5)   
+  FetchContent_Declare(cvode
+    GIT_REPOSITORY https://github.com/LLNL/sundials.git
+    GIT_TAG v5.1.0
+    GIT_SHALLOW true
+    GIT_PROGRESS true
+    )
+else()
+    FetchContent_Declare(cvode
+    GIT_REPOSITORY https://github.com/LLNL/sundials.git
+    GIT_TAG main
+    GIT_SHALLOW true
+    GIT_PROGRESS true
+    )
+endif()
 
 set(BUILD_CVODE ON)
 
