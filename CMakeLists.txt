@@ -23,7 +23,7 @@
 cmake_minimum_required(VERSION 3.13)
 set(CMAKE_CXX_STANDARD 14)
 
-project(tetmag VERSION 1.7.4 LANGUAGES C CXX)
+project(tetmag VERSION 1.7.5 LANGUAGES C CXX)
 # These options can be set with ccmake or with cmake -D 
 option(TETMAG_USE_OPENMP "Compile with OpenMP" ON)
 option(TETMAG_USE_CUDA "Enable CUDA" ON)
@@ -43,9 +43,6 @@ check_language(CUDA)
 if (CMAKE_CUDA_COMPILER)
   set(CMAKE_CUDA_HOST_COMPILER ${TETMAG_HOST_COMPILER} )  
   enable_language(CUDA)
-#  set(HOST_COMPILER "/usr/bin/g++-7") 
-  # ^^^ select host compiler version that is compatible with installed CUDA version.
-  # (see https://gist.github.com/ax3l/9489132 )
 endif(CMAKE_CUDA_COMPILER)
 
 if(TETMAG_USE_CUDA)  
@@ -81,7 +78,6 @@ message("-- Build with options CUDA=${USE_CUDA} and OpenMP=${USE_OpenMP}")
 set(EXTDIR ${PROJECT_SOURCE_DIR}/external )
 set(LIBDIR ${PROJECT_SOURCE_DIR}/lib )
 
-include(${EXTDIR}/CMakeLists.txt)   # install external dependencies
 
 #set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
 #set(CMAKE_VERBOSE_MAKEFILE OFF) 
@@ -100,9 +96,6 @@ configure_file(${PROJECT_SOURCE_DIR}/main/tetmagVersion.h.in ${PROJECT_SOURCE_DI
 #string(APPEND CMAKE_CXX_FLAGS_RELEASE " -DEIGEN_USE_BLAS")
 #string(APPEND CMAKE_CXX_FLAGS_RELEASE " -pg")
 
-if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
-	add_compile_options( -Wall -Wextra ) 	
-endif()	
 
 if (CMAKE_BUILD_TYPE MATCHES Release)
   #string(APPEND CMAKE_CXX_FLAGS_RELEASE " -mavx " ) # not compatible with CUDA
@@ -143,6 +136,9 @@ set(GPU ${PROJECT_SOURCE_DIR}/gpu/)
 if (USE_CUDA)   	
   include(${GPU}/CMakeLists.txt)
 endif(USE_CUDA)
+
+include(${EXTDIR}/CMakeLists.txt)   # install external dependencies
+
 
 include_directories(${PREPROC} ${UTILS} ${IO} ${SPECS} ${MAIN} ${GPU} ${EIGEN3_INCLUDE_DIR} ${VTK_INCLUDE_DIRS})
 

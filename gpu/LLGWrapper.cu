@@ -167,7 +167,7 @@ int TheLLG::gpuODE(std::vector<double>& mag_vec, double ode_start_t, double ode_
 //	
 
 
-    mag_vec_tmp = mag_vec;  // copy to thrust::device_vector
+	mag_vec_tmp = mag_vec;  // copy to thrust::device_vector
 #ifndef OLD_CVODE_VERSION
 	SUNContext sunctx; 
     SUNContext_Create(NULL, &sunctx); 
@@ -250,4 +250,3 @@ int TheLLG::rhs_d(realtype t, N_Vector u, N_Vector u_dot, void *user_data) {
 	u_data->llg->copyTimer.add();
 	return (0); // <--- This is required to signal success
 }
-

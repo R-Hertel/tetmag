@@ -45,9 +45,7 @@ foreach(ARCH ${GPU_ARCHITECTURES})
   list(APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_${ARCH},code=sm_${ARCH} ")
 endforeach() 
 
-#  set(CMAKE_CUDA_HOST_COMPILER  /usr/bin/g++-7)
   add_definitions(-DUSE_CUDA)
-#  set(GPU ${PROJECT_SOURCE_DIR}/gpu/ )
   set (NVCC_FLAGS "-DUSE_CUDA ; -Xptxas -O3; -Xcompiler -O3; -ccbin ${CMAKE_CUDA_HOST_COMPILER}; ")
   #string(APPEND NVCC_FLAGS "-Xcudafe --diag_suppress=esa_on_defaulted_function_ignored; -Wno-deprecated-gpu-targets; ")
   string(APPEND NVCC_FLAGS " -Wno-deprecated-gpu-targets; ")
@@ -55,13 +53,8 @@ endforeach()
   list(APPEND CUDA_NVCC_FLAGS ${NVCC_FLAGS})
  
   set(CMAKE_CUDA_STANDARD 11)
-  #if(USE_OpenMP)
-  #  list(APPEND CUDA_NVCC_FLAGS "-Xcompiler -fopenmp;")
-  #endif(USE_OpenMP)	
 
   list(APPEND CUDA_NVCC_FLAGS " -w;")
-	list(APPEND CUDA_NVCC_FLAGS " -g;")
-#  list(APPEND CUDA_NVCC_FLAGS " -Wno-deprecated-declarations; ")
   message("-- NVCC_FLAGS = " ${CUDA_NVCC_FLAGS}) 
 
   set (CUDA_FILES
