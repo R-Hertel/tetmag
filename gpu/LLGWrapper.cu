@@ -142,21 +142,6 @@ int TheLLG::gpuODE(std::vector<double>& mag_vec, double ode_start_t, double ode_
 	int flag;
 	sunindextype N = 3 * nx;
 	copyTimer.start();
-	//
-	//	int* major = (int*)malloc(sizeof(int));
-	//	int* minor = (int*)malloc(sizeof(int));
-	//	int* patch = (int*)malloc(sizeof(int));
-	//	int major ;
-	//	int minor ;
-	//	int patch ;
-	//	int len;
-	//	char label;
-	//	char* label = (char *)malloc( 20 *sizeof(char));;
-	//	SUNDIALSGetVersionNumber(major, minor, patch, label, len);
-	//	int SUNDIALSGetVersionNumber(major, minor, 	patch, 	&label, len);
-	//	std::cout << "CVODE version : " << major << "." << minor << "." << patch << std::endl;
-	//	std::exit(1);
-	//
 
 	mag_vec_tmp = mag_vec;  // copy to thrust::device_vector
 	#ifdef USE_CVODE_5

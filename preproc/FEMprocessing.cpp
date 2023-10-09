@@ -51,33 +51,7 @@
 #include <stdexcept>
 #include <array>
 
-
 using namespace Eigen;
-
-std::string exec(const char* cmd) {
-    std::array<char, 128> buffer;
-    std::string result;
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-    if (!pipe) {
-        throw std::runtime_error("error in obtaining license info");
-    }
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-        result += buffer.data();
-    }
-    if (!result.empty()) result.erase(std::prev(result.end())); // remove carriage return at end
-    return result;
-}
-
-std::vector<std::string> splitString(std::string sysOutput) {
-	std::istringstream iss(sysOutput);
-	std::vector<std::string> tokens;
-	std::string token;
-	while (std::getline(iss, token, '.')) {
-		if (!token.empty())
-		tokens.push_back(token);
-	}
-	return tokens;
-}
 
 
 PreprocessMesh::PreprocessMesh(MeshData& msh_) :

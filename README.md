@@ -62,8 +62,8 @@ The following software can accomplish these tasks:
 The documentation describes the required pre- and postprocessing steps and shows how `tetmag` interacts with this external software. 
 
 ## Usage
- - A short introduction to the usage of `tetmag` can be found at [https://tetmag.readthedocs.io](https://tetmag.readthedocs.io/). 
- - Examples of simple simulation studies will be added in the [examples directory](https://github.com/R-Hertel/tetmag/tree/main/examples/) to provide a quick introduction to the usage of tetmag.
+ - For a short introduction to the usage of `tetmag` see the documentation at [https://tetmag.readthedocs.io](https://tetmag.readthedocs.io/). 
+ - Examples of simple simulation studies with `tetmag` can be found in the [examples directory](https://github.com/R-Hertel/tetmag/tree/main/examples/).
 
 
 ## Credits

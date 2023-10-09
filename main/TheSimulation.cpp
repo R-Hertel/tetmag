@@ -117,9 +117,7 @@ void TheSimulation::start() {
 		integrateOnGPU = prog.integrateOnGPU;
 //		integrateOnGPU = true;
 #ifdef USE_CUDA 
-//	if(prog.solverType == "cuda") {
-//			std::cout << "This GPU version of tetmag is powered by AMGCL." << std::endl;
-//	}
+
 
 #else
 		std::cout << "This version of tetmag does not support GPU acceleration." << std::endl;
@@ -234,11 +232,8 @@ void TheSimulation::start() {
 				&& (maximumTorque > prog.maxTorque || prog.useSTT)) { // STT torque not included in maxtorque
 			totalTimer.start();
 			pdeTimer.start();
-//		cudaProfilerStart();
-//		if (prog.freezeDemag) {  // ToDo: ensure first calculation in the case of !frezee Demag
 			if (calcDemag)
 				LLG.setHdem(demag.calcField(mag));
-//		}
 		    pdeTimer.add();
 			outputTimer.start();
 			LLG.setTime(elapsed_ps);

@@ -34,10 +34,6 @@ set(TETMAG_HOST_COMPILER "/usr/bin/g++" CACHE FILEPATH "CUDA-compatible host com
 # ^^^ select host compiler version that is compatible with the installed CUDA version.
 # (see https://gist.github.com/ax3l/9489132 )
 
-if (APPLE)
-  link_directories(/usr/local/lib)
-  include_directories(/usr/local/include)
-endif()
 
 include(CheckLanguage)
 check_language(CUDA)
@@ -48,7 +44,6 @@ endif(CMAKE_CUDA_COMPILER)
 
 if(TETMAG_USE_CUDA)  
   include(FindCUDA) 
-#  find_package(CUDA 10.1)  # deprecated syntax
   if (CUDA_FOUND)
     set(USE_CUDA ON)
     if (CMAKE_CUDA_COMPILER_VERSION LESS 10.1)    
@@ -79,6 +74,11 @@ message("-- Build with options CUDA=${USE_CUDA} and OpenMP=${USE_OpenMP}")
 set(EXTDIR ${PROJECT_SOURCE_DIR}/external )
 set(LIBDIR ${PROJECT_SOURCE_DIR}/lib )
 
+if (APPLE)
+  link_directories(/usr/local/lib)
+  link_directories(${LIBDIR})
+  include_directories(/usr/local/include)
+endif()
 
 #set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
 #set(CMAKE_VERBOSE_MAKEFILE OFF) 
@@ -123,10 +123,6 @@ add_definitions(-DUSE_NETCDF)
 find_package(BLAS)
 find_package(LAPACK)
 
-#find_package(SUNDIALS REQUIRED)
-#find_library(GMSH_LIB gmsh REQUIRED)
-#find_package(Cairo REQUIRED)
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/)
 
@@ -142,7 +138,6 @@ if (USE_CUDA)
 endif(USE_CUDA)
 
 include(${EXTDIR}/CMakeLists.txt)   # install external dependencies
-
 
 include_directories(${PREPROC} ${UTILS} ${IO} ${SPECS} ${MAIN} ${GPU} ${EIGEN3_INCLUDE_DIR} ${VTK_INCLUDE_DIRS})
 
@@ -160,12 +155,10 @@ set (PREPROC_FILES
 )
 
 file(GLOB PREPROC_SRC ${PREPROC_FILES})
-#add_library(prep ${PREPROC_SRC} )
 add_library(prep STATIC ${PREPROC_SRC})
 set(PREPLIB prep)
 target_link_libraries(${PREPLIB} ${VTK_LIBRARIES})
 
-#set(Boost_USE_STATIC_LIBS ON)
 if (NOT VTK_VERSION VERSION_LESS "8.90.0")  
   vtk_module_autoinit(TARGETS ${PREPLIB} MODULES ${VTK_LIBRARIES})
 endif()
@@ -199,17 +192,12 @@ set (TETMAG_FILES
 if (USE_CUDA)
   set (CVODE_CUDA sundials_nveccuda)
 	cuda_add_executable(${PROJECT_NAME} ${TETMAG_FILES} ${CUDA_FILES})
-	target_link_libraries(${PROJECT_NAME} ${CUDA_cusparse_LIBRARY} ${CVODE_CUDA})
-	#   CUDA_ADD_CUBLAS_TO_TARGET( ${PROJECT_NAME} )	
+	target_link_libraries(${PROJECT_NAME} ${CUDA_cusparse_LIBRARY} ${CVODE_CUDA})	
 else()
  	 add_executable(${PROJECT_NAME} ${TETMAG_FILES} )
 endif(USE_CUDA)	
 
-# get_target_property(COMPILE_FLAGS ${PROJECT_NAME} COMPILE_OPTIONS)
-# message("Retrieved Compiler flags: ${COMPILE_FLAGS}")
-     
 add_dependencies(${PROJECT_NAME} amgcl sundials_cvode gmsh h2lib)
-#set(CMAKE_EXE_LINKER_FLAGS " -static-libgcc -static-libstdc++ -Wl,-rpath='$ORIGIN'")
 target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 target_link_libraries(${PROJECT_NAME} Boost::boost Boost::filesystem Boost::program_options Boost::system Boost::thread)
@@ -223,7 +211,6 @@ if(USE_OpenMP)
 	add_dependencies(${PROJECT_NAME} ${CVODE_OMP})
 	target_link_libraries(${PROJECT_NAME} ${CVODE_OMP})
 endif(USE_OpenMP)	
-#	target_link_libraries(${PROJECT_NAME} -static-libgcc -static-libstdc++ )	
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 

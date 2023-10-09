@@ -405,20 +405,6 @@ void TheLLG::calcUtermSTT(MRef &Mag) {
 		stt.Ustt = gpucalc->UTermSTT_GPU();
 #endif
 	} else {
-/*
-		VectorXd Mx = Mag.col(x);
-		VectorXd My = Mag.col(y);
-		VectorXd Mz = Mag.col(z);
-		stt.Ustt.col(x) = stt.eta_jx.cwiseProduct(stt.gradX * Mx)
-				+ stt.eta_jy.cwiseProduct(stt.gradY * Mx)
-				+ stt.eta_jz.cwiseProduct(stt.gradZ * Mx);
-		stt.Ustt.col(y) = stt.eta_jx.cwiseProduct(stt.gradX * My)
-				+ stt.eta_jy.cwiseProduct(stt.gradY * My)
-				+ stt.eta_jz.cwiseProduct(stt.gradZ * My);
-		stt.Ustt.col(z) = stt.eta_jx.cwiseProduct(stt.gradX * Mz)
-				+ stt.eta_jy.cwiseProduct(stt.gradY * Mz)
-				+ stt.eta_jz.cwiseProduct(stt.gradZ * Mz);
-		*/
 // #pragma omp parallel for // SparseMVP is already parallelized by Eigen.
 		for (int i = 0; i < 3; ++i) {
 			stt.Ustt.col(i) = stt.eta_jx.cwiseProduct(stt.gradX * Mag.col(i))
@@ -461,7 +447,6 @@ MatrixXd fieldFromAngles(int nx, double Habs, double theta_h, double phi_h) {
 	Hfield *= ( Habs / PhysicalConstants::mu0 );
 	return Hfield;
 }
-
 
 /////////////////////////////////// SETTER ///////////////////////////////////////////
 

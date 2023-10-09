@@ -99,10 +99,6 @@ public:
 	BiCGSTAB<SpMat_RM, IncompleteLUT<double> > solver;
 //	BiCGSTAB<SpMat_RM > solver;
 	bool compute() {
-#ifdef _OPENMP
-//		int chunk_size = A.rows() / omp_get_max_threads();
-//		omp_set_schedule( omp_sched_static, chunk_size );
-#endif
 		Ar = A; // setting row-major matrix
 		previous = VectorXd::Ones(Ar.rows()); // initial guess
 		solver.setTolerance( cgTol );
@@ -113,8 +109,6 @@ public:
 		return true; // only to match factory signature
 	}
 	void solve(){
-//		x = solver.solve(b);
-//		std::cout << "number of available threads: " << Eigen::nbThreads( ) << std::endl;
 		x = solver.solveWithGuess(b, previous);
 		previous = x;
 	}
@@ -141,7 +135,6 @@ std::shared_ptr<SolverFactory> SolverFactory::makeSolver(std::string type) {
 #else
 		std::cout << "GPU option is not available in this version." << std::endl;
 		return std::shared_ptr<SolverFactory>(std::make_shared<AMGCLSolver>());
-//		return std::shared_ptr<SolverFactory>(std::make_shared<CGSolver>());
 #endif
 	} else {
 		std::cout << "solver option not understood." << std::endl;
