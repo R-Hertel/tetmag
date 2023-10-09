@@ -179,6 +179,7 @@ public:
 	double cgTol;
 	bool useCVODE;
 	bool showTimer;
+	double gamma;
 };
 
 

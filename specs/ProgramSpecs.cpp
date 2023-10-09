@@ -118,6 +118,7 @@ void ProgramSpecs::initialize() {
 			("device number", opt::value<int>()->default_value(0), "identifier of GPU device in the case of multiple GPUs")
 			("use CVODE", opt::value<bool>()->default_value(false), "select CVODE integrator (instead of ODEINT)")
 			("timer output", opt::value<bool>()->default_value(false), "display amount of time spent in individual parts of the code")
+			("gamma", opt::value<double>()->default_value(PhysicalConstants::gamma0), "gyromagnetic")
 			;
 
 	std::ifstream cfg_stream(configurationFile.c_str());
@@ -251,6 +252,7 @@ void ProgramSpecs::readFile() {
 	if (vm.count("device number")) deviceNumber = vm["device number"].as<int>();
 	if (vm.count("use CVODE"))useCVODE = vm["use CVODE"].as<bool>();
 	if (vm.count("timer output"))showTimer = vm["timer output"].as<bool>();
+	if (vm.count("gamma"))gamma=vm["gamma"].as<double>();
 
 	defaultedCurrentType = vm["current type"].defaulted();
 	evalInput();

@@ -67,6 +67,7 @@ public:
 	Hlocal Hl;
 	void readLocalFieldProfile();
 	bool useGPU;
+	double gamma;
 };
 
 #endif /* SIMULATIONDATA_H_ */

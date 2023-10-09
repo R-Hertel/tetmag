@@ -53,7 +53,7 @@ double SimulationData::psTimeScaleFactor() {
 	const double pico = 1.e-12;
 //	double scf = PhysicalConstants::gamma0 / (1. + alpha * alpha) * pico; // gamma in [ m / (A.s) ]
 //	double scf = PhysicalConstants::gamma0 * PhysicalConstants::mu0 / (1. + alpha * alpha) * pico; // gamma in [ 1 / (T.s) ]
-	return PhysicalConstants::gamma0 / (1. + alpha * alpha) * pico;
+	return gamma / (1. + alpha * alpha) * pico;
 }
 
 
@@ -74,6 +74,7 @@ void SimulationData::getProgramData(ProgramSpecs& prog) {
 	Hl.amplitude /= 1000.; // convert input data from mT to T
 	Hl.amplitude /= PhysicalConstants::mu0; // convert [T] to [A/m]
 	useGPU = (prog.solverType == "gpu" || prog.solverType == "pl");
+	gamma = prog.gamma;
 
 }
 

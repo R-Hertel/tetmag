@@ -23,7 +23,7 @@
 cmake_minimum_required(VERSION 3.13)
 set(CMAKE_CXX_STANDARD 14)
 
-project(tetmag VERSION 1.7.5 LANGUAGES C CXX)
+project(tetmag VERSION 1.7.6 LANGUAGES C CXX)
 # These options can be set with ccmake or with cmake -D 
 option(TETMAG_USE_OPENMP "Compile with OpenMP" ON)
 option(TETMAG_USE_CUDA "Enable CUDA" ON)
