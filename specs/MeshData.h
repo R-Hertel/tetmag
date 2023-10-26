@@ -57,7 +57,7 @@ public:
 	SpMat dirichletMatrix;
 	Eigen::VectorXi NodeMaterial;
 	void ascribeMaterialsToNodes();
-	void selectAnisotropicSurfaces(const Eigen::VectorXd&);
+	void selectAnisotropicSurfaces(Eigen::VectorXd&);
 	Eigen::MatrixXd laplaceBEM; // dense BEM matrix, only used in the case prog.useH2 = false
 	void preprocessBEM(bool);
 };

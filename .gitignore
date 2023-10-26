@@ -6,3 +6,4 @@ external/amgcl/
 external/sundials/
 external/gmsh/
 external/h2lib/
+main/tetmagVersion.h

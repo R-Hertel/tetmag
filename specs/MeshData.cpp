@@ -66,7 +66,7 @@ void MeshData::ascribeMaterialsToNodes() {
 }
 
 
-void MeshData::selectAnisotropicSurfaces(const VectorXd& Ks) {
+void MeshData::selectAnisotropicSurfaces(VectorXd& Ks) {
 
 (void) Ks;	// only to silence the "unused parameter" warning when nothing is selected
 
