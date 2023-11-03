@@ -4,7 +4,7 @@
 ![GitHub Release Date](https://img.shields.io/github/release-date/R-Hertel/tetmag?style=plastic)
 
 
- <img src="https://github.com/R-Hertel/tetmag/blob/main/resources/tetmagLogo_v5.png" width="400" >
+ <img src="resources/tetmagLogo_v5.png" width="400" >
 
 `tetmag` is a finite-element software for general-purpose micromagnetic simulations.
 <!--- ![tetmag logo](https://github.com/R-Hertel/tetmag/blob/main/resources/tetmagLogo_v1.png) --->
