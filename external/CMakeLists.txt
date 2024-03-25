@@ -99,7 +99,8 @@ if(TETMAG_USE_CVODE_5)
 else()
     FetchContent_Declare(cvode
     GIT_REPOSITORY https://github.com/LLNL/sundials.git
-    GIT_TAG main
+    GIT_TAG v6.7.0
+#    GIT_TAG main
     GIT_SHALLOW true
     GIT_PROGRESS true
     )
