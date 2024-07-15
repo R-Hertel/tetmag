@@ -9,7 +9,7 @@ VTK-9.0.3
 
 Depending on the compiler that is being used, the release number 9.0.3 of the VTK library can be problematic. The issue has been discussed `here <https://discourse.vtk.org/t/compilation-error-include-limits-required-in-several-files/6496/2>`_ . Some C++ compilers implicitly include the missing header, while others complain. 
 
-.. image:: ../troubleshooting/vtk9-0_missing_header.png
+.. image:: ../issues/vtk9-0_missing_header.png
 
 
 To resolve this problem, we suggest installing a more recent version of `the VTK library <https://vtk.org/download/>`_.
