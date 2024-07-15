@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'tetmag'
-copyright = '2023, Université de Strasbourg and CNRS, Author: Riccardo Hertel'
+copyright = '2023,2024 Université de Strasbourg and CNRS, Author: Riccardo Hertel'
 author = 'Riccardo Hertel <riccardo.hertel@ipcms.unistra.fr>'
 
 # The short X.Y version

@@ -38,6 +38,7 @@
 #include <thrust/transform.h>
 #include <thrust/functional.h>
 #include <thrust/execution_policy.h>
+#include <iostream>
 
 dev_vec mag_vec_tmp;
 dev_vec ret_vec_tmp;

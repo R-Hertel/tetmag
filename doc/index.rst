@@ -28,6 +28,7 @@ The source code is available under AGPL-3.0 license at https://github.com/R-Hert
    ./examples/example1
    ./examples/example2
    ./examples/example3
+   ./issues/compile
 
 
 
