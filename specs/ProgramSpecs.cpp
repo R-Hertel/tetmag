@@ -80,6 +80,7 @@ void ProgramSpecs::initialize() {
 			("phi_H", opt::value<double>()->default_value(0.), "azimuth angle Hext direction (in degrees).")
 			("freeze demag", opt::value<bool>()->default_value(true), "separate demag field calculation from LLG integration (faster)")
 			("neglect demag", opt::value<bool>()->default_value(false), "simulate without demag field")
+			("remove demag", opt::value<bool>()->default_value(false), "simulate without demag field (alternative keyword)")
 			("field pulse", opt::value<bool>()->default_value(false), "external field pulse applied (yes / no)")
 			("pulse duration", opt::value<double>()->default_value(0.), "time width of Gaussian field pulse in ps")
 			("pulse delay", opt::value<double>()->default_value(0.), "time in ps at which Gaussian field pulse reaches maximum value")
@@ -212,7 +213,6 @@ void ProgramSpecs::readFile() {
 	if (vm.count("theta_H")) theta_H = vm["theta_H"].as<double>();
 	if (vm.count("phi_H")) phi_H = vm["phi_H"].as<double>();
 	if (vm.count("freeze demag")) freezeDemag = vm["freeze demag"].as<bool>();
-	if (vm.count("neglect demag")) noDemag = vm["neglect demag"].as<bool>();
 	if (vm.count("mesh type")) meshType = toLower(vm["mesh type"].as<std::string>());
 	if (vm.count("field pulse")) fieldPulse = vm["field pulse"].as<bool>();
 	if (vm.count("pulse duration")) pulseWidth = vm["pulse duration"].as<double>();
@@ -220,6 +220,7 @@ void ProgramSpecs::readFile() {
 	if (vm.count("pulse amplitude")) pulsePeak = vm["pulse amplitude"].as<double>();
 	if (vm.count("pulse theta")) pulseTheta = vm["pulse theta"].as<double>();
 	if (vm.count("pulse phi")) pulsePhi = vm["pulse phi"].as<double>();
+	if (vm.count("remove demag")) noDemag = (vm["neglect demag"].as<bool>() || vm["remove demag"].as<bool>());
 	if (vm.count("sweep field")) sweepUsed = vm["sweep field"].as<bool>();
 	if (vm.count("sweep start")) sweepStart = vm["sweep start"].as<double>();
 	if (vm.count("sweep end")) sweepEnd = vm["sweep end"].as<double>();
