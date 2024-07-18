@@ -96,7 +96,7 @@ The ``simulation.cfg`` file used to simulate the field-driven switching contains
 		    phi_H = 170 # azimuthal angle
 
 
-The ``torque limit`` entry ws removed to ensure that the simulation runs for 1 ns, irrespectice of the evolution of the magnetic structure. Moreover, we lowered the ``time step`` value to 0.1 ps, which is genarally a safe choice for low-damping simulations like this one. 
+The ``torque limit`` entry was removed to ensure that the simulation runs for 1 ns, irrespectice of the evolution of the magnetic structure. Moreover, we lowered the ``time step`` value to 0.1 ps, which is genarally a safe choice for low-damping simulations like this one. 
 The ``material001.dat`` file remains unchanged compared to the one used for the quasistatic calculation of the s-state.
 
 After the simulation, the resulting magnetization dynamics can be analyzed as described before. The image below displays the average :math:`y` component of the magnetization :math:`\langle M_y\rangle/M_s` as a function of time:
