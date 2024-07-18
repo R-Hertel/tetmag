@@ -1,10 +1,10 @@
 Ex. 3: Current-induced dynamics
 ===============================
 
-When an electric current flows through a ferromagnetic material, it aquires a spin polarization through which the conduction electrons interact with the magnetization. This effect is described by the so-called spin-transfer torque (STT).
+When an electric current flows through a ferromagnetic material, it acquires a spin polarization through which the conduction electrons interact with the magnetization. This effect is described by the so-called spin-transfer torque (STT).
 In this example, we simulate the STT-induced magnetization dynamics in a square Permalloy platelet. The micromagnetic problem simulated here is based on a proposal by Najafi et al., published in Ref.  [\ 1_\ ].
 
-The sample is a Permalloy platelet of 100 nm :math:`\times` 100 nm :math:`\times` 10 nm size. We use FreeCAD to define the geometry and to generate an irregular FEM mesh with the netgen plugin. In our example, the mesh size is set to 2 nm, resulting in 39 246 irregularly shaped terahedral finite elements.
+The sample is a Permalloy platelet of 100 nm :math:`\times` 100 nm :math:`\times` 10 nm size. We use FreeCAD to define the geometry and to generate an irregular FEM mesh with the netgen plugin. In our example, the mesh size is set to 2 nm, resulting in 39,246 irregularly shaped terahedral finite elements.
 
 Calculating the initial configuration
 -------------------------------------
@@ -64,8 +64,8 @@ The dynamic simulation with STT yields a displacement of the vortex along a spir
 
 .. image:: ./../figs/example3/mxmy_vs_t.png
 
-These results are in good agreement with the data reported in Fig. 6 of the article by Najafi et al. 1_ . Minor deviations can be attributed to the relatively coarse mesh used in this simulation, and to the fact that ``tetmag`` uses the electron gyromagnetic ratio :math:`\gamma=2.21276148\times 10^5` rad m/ As, whereas the problem specification indicates a slightly different value of :math:`2.211\times 10⁵` rad m / As.
-Other data that the authors of Ref. 1_ suggest for comparison are the average :math:`x` and :math:`y` components of the magnetization of the equilibrium state reached after 14 ns. Our simulation yields :math:`\langle M_x\rangle = -1.7009\times 10^5` A/m and  :math:`\langle M_y\rangle = 1.566  \times 10^4` A/m, which compares fairly well with the data reported in Table 1 of Ref. 1_ . Here, too, we expect to obtain better agreement when using smaller sizes.
+These results are in good agreement with the data reported in Fig. 6 of the article by Najafi et al. [\ 1_\ ] . Minor deviations can be attributed to the relatively coarse mesh used in this simulation, and to the fact that ``tetmag`` uses the electron gyromagnetic ratio :math:`\gamma=2.21276148\times 10^5` rad m/ As, whereas the problem specification indicates a slightly different value of :math:`2.211\times 10⁵` rad m / As.
+Other data that the authors of Ref. [\ 1_\ ] suggest for comparison are the average :math:`x` and :math:`y` components of the magnetization of the equilibrium state reached after 14 ns. Our simulation yields :math:`\langle M_x\rangle = -1.7009\times 10^5` A/m and  :math:`\langle M_y\rangle = 1.566  \times 10^4` A/m, which compares rather well with the data reported in Table 1 of Ref. [\ 1_ \]. Here, too, we expect to obtain better agreement when using smaller cell sizes.
 
 .. [1] `M. Najafi, B. Krüger, S. Bohlens, M. Franchin, H. Fangohr, A. Vanhaverbeke, R. Allenspach, M. Bolte, U. Merkt, D. Pfannkuche, D.P.F. Möller, G. Meier,. Proposal for a Standard Problem for Micromagnetic Simulations Including Spin-Transfer Torque. J. Appl. Phys. 105, 113914 (2009) <https://doi.org/10.1063/1.3126702>`_
  
