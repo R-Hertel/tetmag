@@ -15,7 +15,7 @@ In this example, we will simulate a skyrmion texture developing in a FeGe nanocy
 
 Geometry and mesh
 -----------------
-Specifically, we will consider a FeGe cylinder with a radius:math:`r = 91.5` nm and a thickness:math:`d = 21` nm. The cylinder is centered at the origin of the Cartesian reference frame (0,0,0), and its top and bottom surfaces are parallel to the *xy*-plane.
+Specifically, we will consider a FeGe cylinder with a radius :math:`r = 91.5` nm and a thickness :math:`d = 21` nm. The cylinder is centered at the origin of the Cartesian reference frame (0,0,0), and its top and bottom surfaces are parallel to the *xy*-plane.
 In this example, the definition of the geometry and the finite-element mesh generation is done with `gmsh <https://gmsh.info/>`_. We use a simple file :download:`cyl.geo <../../examples/example4/cyl.geo>` to define a cylinder with the required dimensions and a tetrahedral mesh with a characteristic lateral cell size of 2 nm. Along the thickness, the geometry is discretized into nine equidistant layers.
 
 .. image:: ./../figs/example4/cyl_mesh.png
