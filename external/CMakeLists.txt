@@ -77,48 +77,51 @@ FetchContent_Declare(amgcl
 
 set(AMGCL_BUILD_EXAMPLES OFF CACHE BOOL "")
 set(AMGCL_BUILD_TESTS OFF CACHE BOOL "")
-# FetchContent_GetProperties(amgcl)
 
-# if(NOT amgcl_POPULATED)
-#  FetchContent_Populate(amgcl)
-#  add_subdirectory(${amgcl_SOURCE_DIR} ${EXTDIR}/amgcl)
-# endif()
 FetchContent_MakeAvailable(amgcl)
 
 ###############################################################################
 # Install CVODE
 
 include(FetchContent)
+find_package(LAPACK REQUIRED)
+
 if(TETMAG_USE_CVODE_5)   
-  FetchContent_Declare(cvode
-    GIT_REPOSITORY https://github.com/LLNL/sundials.git
-    GIT_TAG v5.1.0
-    GIT_SHALLOW true
-    GIT_PROGRESS true
+    FetchContent_Declare(
+        cvode
+        GIT_REPOSITORY https://github.com/LLNL/sundials.git
+        GIT_TAG v5.1.0
+        GIT_SHALLOW true
+        GIT_PROGRESS true
     )
 else()
-    FetchContent_Declare(cvode
-    GIT_REPOSITORY https://github.com/LLNL/sundials.git
-    GIT_TAG v6.7.0
-#    GIT_TAG main
-    GIT_SHALLOW true
-    GIT_PROGRESS true
+    FetchContent_Declare(
+        cvode
+        GIT_REPOSITORY https://github.com/LLNL/sundials.git
+        GIT_TAG v6.7.0
+        GIT_SHALLOW true
+        GIT_PROGRESS true
     )
 endif()
+
+set(SUNDIALS_ENABLE_LAPACK ON CACHE BOOL "" FORCE)
+set(ENABLE_LAPACK ON CACHE BOOL "" FORCE)
+set(SUNDIALS_LAPACK_LIBRARIES "${LAPACK_LIBRARIES}" CACHE STRING "" FORCE)
+set(LAPACK_FOUND TRUE CACHE BOOL "" FORCE)
 
 set(BUILD_CVODE ON)
 
 if (USE_CUDA)
-  set(EXAMPLES_ENABLE_CUDA OFF CACHE BOOL "")
-  set(CMAKE_CUDA_ARCHITECTURES ${GPU_ARCHITECTURES})  
-  set(ENABLE_CUDA ON CACHE BOOL "")
-  set(BUILD_NVECTOR_CUDA ON CACHE BOOL "")
-  set(CMAKE_CUDA_STANDARD 14)
+    set(EXAMPLES_ENABLE_CUDA OFF CACHE BOOL "")
+    set(CMAKE_CUDA_ARCHITECTURES ${GPU_ARCHITECTURES})  
+    set(ENABLE_CUDA ON CACHE BOOL "")
+    set(BUILD_NVECTOR_CUDA ON CACHE BOOL "")
+    set(CMAKE_CUDA_STANDARD 14)
 endif()
-  
+
 if (USE_OpenMP)
-  set(ENABLE_OPENMP ON CACHE BOOL "")
-  set(BUILD_NVECTOR_OPENMP ON CACHE BOOL "")
+    set(ENABLE_OPENMP ON CACHE BOOL "")
+    set(BUILD_NVECTOR_OPENMP ON CACHE BOOL "")
 endif()
 
 set(BUILD_ARKODE OFF CACHE BOOL "")
@@ -126,22 +129,15 @@ set(BUILD_TESTING OFF CACHE BOOL "")
 set(BUILD_CVODES OFF CACHE BOOL "")
 set(BUILD_KINSOL OFF CACHE BOOL "")
 set(BUILD_IDA OFF CACHE BOOL "")
-set(BUILD_IDAS OFF CACHE BOOL "" )
+set(BUILD_IDAS OFF CACHE BOOL "")
 set(EXAMPLES_ENABLE_C OFF CACHE BOOL "")
 set(EXAMPLES_INSTALL OFF CACHE BOOL "")
 
-# FetchContent_GetProperties(cvode)
-
-# if(NOT cvode_POPULATED)
-#   FetchContent_Populate(cvode)
-#   add_subdirectory(${cvode_SOURCE_DIR} ${EXTDIR}/sundials)
-# endif()
 FetchContent_MakeAvailable(cvode)
 set(CVODELIB sundials_cvode)
 
 ###############################################################################
 # Intall GMSH
-
 
 if(WIN32)
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -163,12 +159,15 @@ if(UNIX AND NOT APPLE)
   set(GMSH_DOWNLOAD_LINK "https://gmsh.info/bin/Linux/gmsh-git-Linux64-sdk.tgz")
 endif(UNIX AND NOT APPLE)
 
+if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 include(ExternalProject)
 ExternalProject_Add(gmsh
   URL ${GMSH_DOWNLOAD_LINK}
   UPDATE_DISCONNECTED true
   SOURCE_DIR ${EXTDIR}/gmsh
-  DOWNLOAD_EXTRACT_TIMESTAMP FALSE
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND ""

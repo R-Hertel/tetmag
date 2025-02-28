@@ -31,7 +31,7 @@ option(TETMAG_FIND_CUDA_ARCH "Autodetect available GPU architectures" ON)
 option(TETMAG_USE_CVODE_5 "Use CVODE v5 instead of latest release" OFF)
 set(TETMAG_SET_CUDA_ARCHS "61;75" CACHE STRING "manually set GPU architectures")
 set(TETMAG_HOST_COMPILER "/usr/bin/g++" CACHE FILEPATH "CUDA-compatible host compiler") 
-# ^^^ select host compiler version that is compatible with the installed CUDA version.
+# ^^^ select host compiler version compatible with the installed CUDA version.
 # (see https://gist.github.com/ax3l/9489132 )
 
 
@@ -47,12 +47,12 @@ if(TETMAG_USE_CUDA)
   if (CUDAToolkit_FOUND)
     set(USE_CUDA ON)
     if (CMAKE_CUDA_COMPILER_VERSION LESS 10.1)    
-      message("-- A CUDA version of at least 10.1 is needed (found unsuitable version ${CMAKE_CUDA_COMPILER_VERSION})")
-      message("-- No suitable CUDA version found. Not using GPU.")
+      message(STATUS "A CUDA version of at least 10.1 is needed (found unsuitable version ${CMAKE_CUDA_COMPILER_VERSION})")
+      message(WARNING "No suitable CUDA version found. Not using GPU.")
       set(USE_CUDA OFF)     
     endif()
   else()
-    message("-- CUDA not found. Not using GPU.")
+    message(WARNING "CUDA not found. Not using GPU.")
     set(USE_CUDA OFF)
   endif(CUDAToolkit_FOUND)
 else()
@@ -62,14 +62,14 @@ endif(TETMAG_USE_CUDA)
 if (TETMAG_USE_OPENMP)
   include(FindOpenMP)  
   if (NOT OpenMP_FOUND)
-    message("-- OpenMP not found.")
+    message(STATUS "OpenMP not found.")
   endif(NOT OpenMP_FOUND)
   set(USE_OpenMP ${OpenMP_FOUND})
 else()
   set(USE_OpenMP OFF)
 endif(TETMAG_USE_OPENMP)
 
-message("-- Build with options CUDA=${USE_CUDA} and OpenMP=${USE_OpenMP}")
+message(STATUS "Build with options CUDA=${USE_CUDA} and OpenMP=${USE_OpenMP}")
 
 set(EXTDIR ${PROJECT_SOURCE_DIR}/external )
 set(LIBDIR ${PROJECT_SOURCE_DIR}/lib )
@@ -79,10 +79,6 @@ if (APPLE)
   link_directories(${LIBDIR})
   include_directories(/usr/local/include)
 endif()
-
-#set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
-#set(CMAKE_VERBOSE_MAKEFILE OFF) 
-
 
 set(default_build_type "Release")
 
@@ -94,9 +90,6 @@ message(STATUS "Build type set to '${CMAKE_BUILD_TYPE}'.")
 
 configure_file(${PROJECT_SOURCE_DIR}/main/tetmagVersion.h.in ${PROJECT_SOURCE_DIR}/main/tetmagVersion.h)
 
-#string(APPEND CMAKE_CXX_FLAGS_RELEASE " -DEIGEN_USE_BLAS")
-#string(APPEND CMAKE_CXX_FLAGS_RELEASE " -pg")
-
 if (TETMAG_USE_CVODE_5)
   add_compile_definitions(USE_CVODE_5)
 endif() 
@@ -105,18 +98,17 @@ if (CMAKE_BUILD_TYPE MATCHES Release)
   #string(APPEND CMAKE_CXX_FLAGS_RELEASE " -mavx " ) # not compatible with CUDA
   #string(APPEND CMAKE_CXX_FLAGS_RELEASE " -march=native") # not compatible with CUDA
   string(APPEND CMAKE_CXX_FLAGS_RELEASE " -fno-math-errno -Wno-unused -Wall -DNDEBUG" )
-  message("-- Build flags: ${CMAKE_CXX_FLAGS_RELEASE} ")  
+  message(STATUS "Build flags: ${CMAKE_CXX_FLAGS_RELEASE} ")
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
 	string(APPEND CMAKE_CXX_FLAGS_DEBUG " -ggdb3")
-	message("-- Build flags: ${CMAKE_CXX_FLAGS_DEBUG} ")
+	message(STATUS "Build flags: ${CMAKE_CXX_FLAGS_DEBUG} ")
 endif()
 
 find_package(Eigen3 3.3.7 REQUIRED NO_MODULE)
 find_package(Boost CONFIG QUIET COMPONENTS filesystem program_options system thread)
-if(NOT Boost_FOUND)    
-    # CONFIG mode failed, fall back to legacy FindBoost module
+if(NOT Boost_FOUND)
     find_package(Boost REQUIRED COMPONENTS filesystem program_options system thread)
     if(Boost_FOUND AND Boost_VERSION_STRING VERSION_LESS "1.70")
         if(POLICY CMP0167)
@@ -133,7 +125,7 @@ find_library(NCDF netcdf REQUIRED)
 add_definitions(-DUSE_NETCDF)
 
 find_package(BLAS)
-find_package(LAPACK)
+find_package(LAPACK REQUIRED)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/)

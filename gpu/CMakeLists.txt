@@ -1,5 +1,5 @@
 #    tetmag - A general-purpose finite-element micromagnetic simulation software package
-#    Copyright (C) 2016-2023 CNRS and Université de Strasbourg
+#    Copyright (C) 2016-2025 CNRS and Université de Strasbourg
 #
 #    Author: Riccardo Hertel
 #
@@ -32,7 +32,7 @@ if (TETMAG_FIND_CUDA_ARCH)
 
   string(FIND ${ptx_check} "ptx" ptx_pos) # this string appears in select_compute_arch if no GPU is found
   if (NOT ptx_pos EQUAL -1) # FIND returns a value of -1 if the string is not found.
-    message("ERROR: No CUDA capable device found.")
+    message(SEND_ERROR "ERROR: No CUDA capable device found.")
     set (USE_CUDA OFF)
   endif() 
    message(STATUS "Detected GPU architectures: ${INSTALLED_GPU_STRING2}")
@@ -55,7 +55,7 @@ endforeach()
   set(CMAKE_CUDA_STANDARD 11)
 
   list(APPEND CUDA_NVCC_FLAGS " -w;")
-  message(STATUS "NVCC_FLAGS: " ${CUDA_NVCC_FLAGS}) 
+  # message(STATUS "NVCC_FLAGS: " ${CUDA_NVCC_FLAGS})
 
   set (CUDA_FILES
     ${GPU}EffFieldGPU.cu  
