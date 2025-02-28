@@ -1,5 +1,5 @@
 #    tetmag - A general-purpose finite-element micromagnetic simulation software package
-#    Copyright (C) 2016-2023 CNRS and Université de Strasbourg
+#    Copyright (C) 2016-2025 CNRS and Université de Strasbourg
 #
 #    Author: Riccardo Hertel
 #
@@ -77,12 +77,12 @@ FetchContent_Declare(amgcl
 
 set(AMGCL_BUILD_EXAMPLES OFF CACHE BOOL "")
 set(AMGCL_BUILD_TESTS OFF CACHE BOOL "")
-FetchContent_GetProperties(amgcl)
+# FetchContent_GetProperties(amgcl)
 
-if(NOT amgcl_POPULATED)
-  FetchContent_Populate(amgcl)
-  add_subdirectory(${amgcl_SOURCE_DIR} ${EXTDIR}/amgcl)
-endif()
+# if(NOT amgcl_POPULATED)
+#  FetchContent_Populate(amgcl)
+#  add_subdirectory(${amgcl_SOURCE_DIR} ${EXTDIR}/amgcl)
+# endif()
 FetchContent_MakeAvailable(amgcl)
 
 ###############################################################################
@@ -130,12 +130,12 @@ set(BUILD_IDAS OFF CACHE BOOL "" )
 set(EXAMPLES_ENABLE_C OFF CACHE BOOL "")
 set(EXAMPLES_INSTALL OFF CACHE BOOL "")
 
-FetchContent_GetProperties(cvode)
+# FetchContent_GetProperties(cvode)
 
-if(NOT cvode_POPULATED)
-  FetchContent_Populate(cvode)
-  add_subdirectory(${cvode_SOURCE_DIR} ${EXTDIR}/sundials)
-endif()
+# if(NOT cvode_POPULATED)
+#   FetchContent_Populate(cvode)
+#   add_subdirectory(${cvode_SOURCE_DIR} ${EXTDIR}/sundials)
+# endif()
 FetchContent_MakeAvailable(cvode)
 set(CVODELIB sundials_cvode)
 
@@ -168,6 +168,7 @@ ExternalProject_Add(gmsh
   URL ${GMSH_DOWNLOAD_LINK}
   UPDATE_DISCONNECTED true
   SOURCE_DIR ${EXTDIR}/gmsh
+  DOWNLOAD_EXTRACT_TIMESTAMP FALSE
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND ""

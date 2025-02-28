@@ -1,5 +1,5 @@
 #    tetmag - A general-purpose finite-element micromagnetic simulation software package
-#    Copyright (C) 2016-2023 CNRS and Université de Strasbourg
+#    Copyright (C) 2016-2025 CNRS and Université de Strasbourg
 #
 #    Author: Riccardo Hertel
 #
@@ -23,7 +23,7 @@
 cmake_minimum_required(VERSION 3.13)
 set(CMAKE_CXX_STANDARD 14)
 
-project(tetmag VERSION 1.7.6 LANGUAGES C CXX)
+project(tetmag VERSION 1.7.7 LANGUAGES C CXX)
 # These options can be set with ccmake or with cmake -D 
 option(TETMAG_USE_OPENMP "Compile with OpenMP" ON)
 option(TETMAG_USE_CUDA "Enable CUDA" ON)
@@ -43,8 +43,8 @@ if (CMAKE_CUDA_COMPILER)
 endif(CMAKE_CUDA_COMPILER)
 
 if(TETMAG_USE_CUDA)  
-  include(FindCUDA) 
-  if (CUDA_FOUND)
+  find_package(CUDAToolkit QUIET)  
+  if (CUDAToolkit_FOUND)
     set(USE_CUDA ON)
     if (CMAKE_CUDA_COMPILER_VERSION LESS 10.1)    
       message("-- A CUDA version of at least 10.1 is needed (found unsuitable version ${CMAKE_CUDA_COMPILER_VERSION})")
@@ -54,7 +54,7 @@ if(TETMAG_USE_CUDA)
   else()
     message("-- CUDA not found. Not using GPU.")
     set(USE_CUDA OFF)
-  endif(CUDA_FOUND)
+  endif(CUDAToolkit_FOUND)
 else()
   set(USE_CUDA OFF)  
 endif(TETMAG_USE_CUDA)
@@ -90,7 +90,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "${default_build_type}")
 endif()
 
-message("-- Build type set to '${CMAKE_BUILD_TYPE}'.")
+message(STATUS "Build type set to '${CMAKE_BUILD_TYPE}'.")
 
 configure_file(${PROJECT_SOURCE_DIR}/main/tetmagVersion.h.in ${PROJECT_SOURCE_DIR}/main/tetmagVersion.h)
 
@@ -114,9 +114,21 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 
 find_package(Eigen3 3.3.7 REQUIRED NO_MODULE)
-find_package(Boost REQUIRED COMPONENTS filesystem program_options system thread)
+find_package(Boost CONFIG QUIET COMPONENTS filesystem program_options system thread)
+if(NOT Boost_FOUND)    
+    # CONFIG mode failed, fall back to legacy FindBoost module
+    find_package(Boost REQUIRED COMPONENTS filesystem program_options system thread)
+    if(Boost_FOUND AND Boost_VERSION_STRING VERSION_LESS "1.70")
+        if(POLICY CMP0167)
+            cmake_policy(SET CMP0167 NEW)
+        endif()
+    endif()
+endif()
+if(NOT Boost_FOUND)
+    message(FATAL_ERROR "Boost not found. Install the Boost library with components: filesystem, program_options, system, thread.")
+endif()
 find_package(Threads REQUIRED)
-find_package(VTK REQUIRED)
+find_package(VTK REQUIRED COMPONENTS CommonCore CommonDataModel IOXML IOLegacy)
 find_library(NCDF netcdf REQUIRED)
 add_definitions(-DUSE_NETCDF)
 
@@ -139,11 +151,7 @@ endif(USE_CUDA)
 
 include(${EXTDIR}/CMakeLists.txt)   # install external dependencies
 
-include_directories(${PREPROC} ${UTILS} ${IO} ${SPECS} ${MAIN} ${GPU} ${EIGEN3_INCLUDE_DIR} ${VTK_INCLUDE_DIRS})
-
-if (VTK_VERSION VERSION_LESS "8.90.0")
-  include(${VTK_USE_FILE})
-endif() 
+include_directories(${PREPROC} ${UTILS} ${IO} ${SPECS} ${MAIN} ${GPU} ${EIGEN3_INCLUDE_DIR} )
 
 set (PREPROC_FILES
   ${PREPROC}BEMprocessing.cpp  
@@ -157,11 +165,7 @@ set (PREPROC_FILES
 file(GLOB PREPROC_SRC ${PREPROC_FILES})
 add_library(prep STATIC ${PREPROC_SRC})
 set(PREPLIB prep)
-target_link_libraries(${PREPLIB} ${VTK_LIBRARIES})
-
-if (NOT VTK_VERSION VERSION_LESS "8.90.0")  
-  vtk_module_autoinit(TARGETS ${PREPLIB} MODULES ${VTK_LIBRARIES})
-endif()
+target_link_libraries(${PREPLIB} VTK::CommonCore VTK::CommonDataModel VTK::IOXML VTK::IOLegacy)
 
 set (TETMAG_FILES
   ${MAIN}tetmag.cpp  
@@ -189,10 +193,11 @@ set (TETMAG_FILES
   ${IO}VTKReader.cpp
 )
  
-if (USE_CUDA)
+if (USE_CUDA) 
   set (CVODE_CUDA sundials_nveccuda)
 	cuda_add_executable(${PROJECT_NAME} ${TETMAG_FILES} ${CUDA_FILES})
-	target_link_libraries(${PROJECT_NAME} ${CUDA_cusparse_LIBRARY} ${CVODE_CUDA})	
+  target_include_directories(${PROJECT_NAME} PUBLIC ${CUDA_INCLUDE_DIRS})  
+	target_link_libraries(${PROJECT_NAME} CUDA::cudart CUDA::cusparse ${CVODE_CUDA})	
 else()
  	 add_executable(${PROJECT_NAME} ${TETMAG_FILES} )
 endif(USE_CUDA)	
@@ -202,7 +207,7 @@ target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
 target_link_libraries(${PROJECT_NAME} Boost::boost Boost::filesystem Boost::program_options Boost::system Boost::thread)
 target_link_libraries(${PROJECT_NAME} ${H2LIB} ${GMSHLIB} ${CVODELIB})
-target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} VTK::CommonCore VTK::CommonDataModel VTK::IOXML VTK::IOLegacy)
 target_link_libraries(${PROJECT_NAME} ${PREPLIB} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${NCDF})
 
 if(USE_OpenMP)
@@ -218,7 +223,3 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${EIGEN3_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${EXTDIR}/gmsh/include>)
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${EXTDIR}/h2lib/Library>)
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${amgcl_SOURCE_DIR}>)
-
-if (NOT VTK_VERSION VERSION_LESS "8.90.0")  
-  vtk_module_autoinit(TARGETS ${PROJECT_NAME} MODULES ${VTK_LIBRARIES})
-endif()

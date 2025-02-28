@@ -35,7 +35,7 @@ if (TETMAG_FIND_CUDA_ARCH)
     message("ERROR: No CUDA capable device found.")
     set (USE_CUDA OFF)
   endif() 
-   message("-- Detected GPU architectures: ${INSTALLED_GPU_STRING2}")
+   message(STATUS "Detected GPU architectures: ${INSTALLED_GPU_STRING2}")
 else(TETMAG_FIND_CUDA_ARCH)
    set (GPU_ARCHITECTURES ${TETMAG_SET_CUDA_ARCHS})
 endif(TETMAG_FIND_CUDA_ARCH)
@@ -49,13 +49,13 @@ endforeach()
   set (NVCC_FLAGS "-DUSE_CUDA ; -Xptxas -O3; -Xcompiler -O3; -ccbin ${CMAKE_CUDA_HOST_COMPILER}; ")
   #string(APPEND NVCC_FLAGS "-Xcudafe --diag_suppress=esa_on_defaulted_function_ignored; -Wno-deprecated-gpu-targets; ")
   string(APPEND NVCC_FLAGS " -Wno-deprecated-gpu-targets; ")
-  find_package(CUDA REQUIRED)
+  find_package(CUDAToolkit REQUIRED)
   list(APPEND CUDA_NVCC_FLAGS ${NVCC_FLAGS})
  
   set(CMAKE_CUDA_STANDARD 11)
 
   list(APPEND CUDA_NVCC_FLAGS " -w;")
-  message("-- NVCC_FLAGS = " ${CUDA_NVCC_FLAGS}) 
+  message(STATUS "NVCC_FLAGS: " ${CUDA_NVCC_FLAGS}) 
 
   set (CUDA_FILES
     ${GPU}EffFieldGPU.cu  
