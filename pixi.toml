@@ -1,7 +1,6 @@
 [workspace]
-authors = ["Hans Fangohr <hans.fangohr@mpsd.mpg.de>"]
 channels = ["conda-forge"]
-name = "tetmag"
+name = "tetmag-env"
 platforms = ["linux-64"]
 version = "0.1.0"
 
