@@ -70,8 +70,8 @@ dev_vec TheLLG::noPrecession_GPU(const dev_vec& mag_vec)
 dev_vec TheLLG::sttDynamics_GPU(const dev_vec& mag_vec)
 {
     dev_vec LLGpart_d = classicVersion_GPU(mag_vec);
-    stt.Ustt = gpucalc->UTermSTT_GPU();
-    dev_vec ret_vec_d = *gpucalc->STT_term_LLG_dev(stt.Ustt, alpha, stt.beta);
+    gpucalc->UTermSTT_GPU();
+    dev_vec ret_vec_d = *gpucalc->STT_term_LLG_dev(alpha, stt.beta);
     double pulseVal = stt.sttPulse ? stt.gaussPulseValue(timeInPs) : 0.0;
     double currentVal = stt.dcAmplitude + stt.pulseAmplitude * pulseVal;
     thrust::transform(ret_vec_d.begin(), ret_vec_d.end(),

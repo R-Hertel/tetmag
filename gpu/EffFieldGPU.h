@@ -74,7 +74,7 @@ private:
 	std::shared_ptr<dev_vec> surfTerm;
 	std::shared_ptr<dev_vec> u_xx, u_xy, u_xz, u_yx, u_yy, u_yz, u_zx, u_zy, u_zz;
 	std::shared_ptr<dev_vec> ju_xx, ju_xy, ju_xz, ju_yx, ju_yy, ju_yz, ju_zx, ju_zy, ju_zz;
-	std::shared_ptr<dev_vec> u_term_stt, ustt_d;
+	std::shared_ptr<dev_vec> u_term_stt;
 	std::shared_ptr<dev_vec> kuAxis_x, kuAxis_y, kuAxis_z, kuVal;
 	std::shared_ptr<dev_vec> hani_x, hani_y, hani_z;
 	std::shared_ptr<dev_vec> kx_mx, ky_my, kz_mz;
@@ -102,9 +102,9 @@ public:
 				const Eigen::VectorXd&,
 				const Eigen::VectorXd&,
 				const Eigen::VectorXd&);
-	Eigen::Matrix<value_type, Eigen::Dynamic, Eigen::Dynamic> UTermSTT_GPU();
+	void UTermSTT_GPU();
 
-	std::shared_ptr<dev_vec> STT_term_LLG_dev(MRef&, const value_type, const value_type);
+	std::shared_ptr<dev_vec> STT_term_LLG_dev(const value_type, const value_type);
 
 	value_type MaxTorque(MRef&);
 	void setUniaxialAnisotropy(const Eigen::MatrixXd&, const Eigen::VectorXd&);

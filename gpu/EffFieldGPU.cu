@@ -104,7 +104,7 @@ dev_vec EffFieldGPU::cwiseProduct(const dev_vec& v1, const dev_vec& v2) {
 }
 
 
-Matrix<double, Dynamic, Dynamic> EffFieldGPU::UTermSTT_GPU() {
+void EffFieldGPU::UTermSTT_GPU() {
 
   GradX_cuda->mvp(*mx_d, *u_xx);
   GradY_cuda->mvp(*mx_d, *u_xy);
@@ -143,8 +143,6 @@ Matrix<double, Dynamic, Dynamic> EffFieldGPU::UTermSTT_GPU() {
 					   u_term_stt->begin() + 2 * nx,
                        sumOfThree<value_type>() );
 
-  thrust::copy(u_term_stt->begin(), u_term_stt->end(), retMatXd.data());
-  return retMatXd;
 }
 
 void EffFieldGPU::calcCurlM() {
@@ -243,7 +241,6 @@ void EffFieldGPU::setSTTDataOnDevice(const SpMat& GradX, const SpMat& GradY, con
 	GradX_cuda = std::make_shared<SpMatCUDA>( GradX );
 	GradY_cuda = std::make_shared<SpMatCUDA>( GradY );
 	GradZ_cuda = std::make_shared<SpMatCUDA>( GradZ );
-	ustt_d = std::make_shared<dev_vec>( 3 * nx );
 	eta_jx_d = std::make_shared<dev_vec>(nx);
 	eta_jy_d = std::make_shared<dev_vec>(nx);
 	eta_jz_d = std::make_shared<dev_vec>(nx);
@@ -418,18 +415,17 @@ struct STT_functor {
 };
 
 
-std::shared_ptr<dev_vec> EffFieldGPU::STT_term_LLG_dev(MRef &Ustt, const value_type alpha, const value_type beta) {
+std::shared_ptr<dev_vec> EffFieldGPU::STT_term_LLG_dev(const value_type alpha, const value_type beta) {
 
-	thrust::copy(Ustt.col(x).data(), Ustt.col(z).data() + nx, ustt_d->begin());
 	thrust::for_each(
 			thrust::make_zip_iterator(
 					thrust::make_tuple(mx_d->begin(), my_d->begin(), mz_d->begin(),
 							dxdt->begin(), dxdt->begin() + nx, dxdt->begin() + 2 * nx,
-							ustt_d->begin(), ustt_d->begin() + nx, ustt_d->begin() + 2 * nx)),
+							u_term_stt->begin(), u_term_stt->begin() + nx, u_term_stt->begin() + 2 * nx)),
 			thrust::make_zip_iterator(
 					thrust::make_tuple(mx_d->end(), my_d->end(), mz_d->end(),
 							dxdt->begin() + nx, dxdt->begin() + 2 * nx,	dxdt->begin() + 3 * nx,
-							ustt_d->begin() + nx, ustt_d->begin() + 2 * nx, ustt_d->begin() + 3 * nx)),
+							u_term_stt->begin() + nx, u_term_stt->begin() + 2 * nx, u_term_stt->begin() + 3 * nx)),
 			STT_functor(alpha, beta));
 	return dxdt;
 }
