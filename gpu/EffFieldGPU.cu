@@ -37,6 +37,7 @@
 #include <thrust/functional.h>
 #include <thrust/fill.h>
 #include <thrust/copy.h>
+#include <thrust/tuple.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <iostream>
 using namespace Eigen;

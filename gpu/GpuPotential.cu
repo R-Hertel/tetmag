@@ -35,6 +35,7 @@
 #include "SpMatCUDA.h"
 #include <thrust/transform.h>
 #include <thrust/functional.h>
+#include <thrust/tuple.h>
 
 using namespace Eigen;
 enum coords {x, y, z};
