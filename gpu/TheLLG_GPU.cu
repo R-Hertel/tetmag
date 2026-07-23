@@ -53,7 +53,7 @@ dev_vec TheLLG::classicVersion_GPU(const dev_vec& mag_vec)
 {
     gpucalc->setMagDev(mag_vec);
     gpucalc->computeAndAccumulateHeff(useUniaxial, useDMI);
-    Eigen::MatrixXd Hcpu = assembleCpuOnlyFields();
+    Eigen::MatrixXd Hcpu = assembleCpuOnlyFields(mag_vec);
     gpucalc->addHostContribution(Hcpu);
     return *gpucalc->ClassicLLG_dev(alpha);
 }
@@ -62,7 +62,7 @@ dev_vec TheLLG::noPrecession_GPU(const dev_vec& mag_vec)
 {
     gpucalc->setMagDev(mag_vec);
     gpucalc->computeAndAccumulateHeff(useUniaxial, useDMI);
-    Eigen::MatrixXd Hcpu = assembleCpuOnlyFields();
+    Eigen::MatrixXd Hcpu = assembleCpuOnlyFields(mag_vec);
     gpucalc->addHostContribution(Hcpu);
     return *gpucalc->LLG_noPrec_dev(alpha);
 }
@@ -84,12 +84,30 @@ dev_vec TheLLG::sttDynamics_GPU(const dev_vec& mag_vec)
     return ret_vec_d;
 }
 
-Eigen::MatrixXd TheLLG::assembleCpuOnlyFields()
+Eigen::MatrixXd TheLLG::assembleCpuOnlyFields(const dev_vec& mag_vec)
 {
     if (hp.pulseIsUsed) calcPulseField();
     if (hp.sweepIsUsed) calcSweepField();
     if (hp.rfIsUsed)    calcRFField();
-    return Hext + Hdem + Hpls + Hswp + Hstat + Hrf;
+
+    Eigen::MatrixXd Hcpu = Hext + Hdem + Hpls + Hswp + Hstat + Hrf;
+
+    if (useCubic || useSurfaceAnisotropy) {
+        std::vector<double> mag_host(3 * nx);
+        thrust::copy(mag_vec.begin(), mag_vec.end(), mag_host.begin());
+        Eigen::Map<const MatrixXd_CM> Mag(mag_host.data(), nx, 3);
+
+        if (useCubic) {
+            calcCubicAnisotropyField(Mag);
+            Hcpu += (Hcub.array().colwise() * invJs.array()).matrix();
+        }
+        if (useSurfaceAnisotropy) {
+            calcSurfaceAnisotropyField(Mag);
+            Hcpu += (Hsurf.array().colwise() * invJs.array()).matrix();
+        }
+    }
+
+    return Hcpu;
 }
 
 void TheLLG::selectLLGTypeGPU(int choice)
