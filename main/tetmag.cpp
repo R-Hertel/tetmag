@@ -119,7 +119,7 @@ exit(0);
 	sd.setMaterialParametersAtNodes(msh, mats);
 	sd.getProgramData(prog);
 	sd.scaleToRealSize();
-	msh.selectAnisotropicSurfaces(sd.Ks);
+	msh.selectAnisotropicSurfaces(sd.Ks, prog.surfaceAnisoAxis, prog.surfaceAnisoNormalMin);
 	sd.readFieldProfile();
 
 // simulation

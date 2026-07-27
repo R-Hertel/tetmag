@@ -123,6 +123,8 @@ void ProgramSpecs::initialize() {
 			("device number", opt::value<int>()->default_value(0), "identifier of GPU device in the case of multiple GPUs")			
 			("timer output", opt::value<bool>()->default_value(false), "display amount of time spent in individual parts of the code")
 			("gamma", opt::value<double>()->default_value(PhysicalConstants::gamma0), "gyromagnetic")
+			("surface aniso axis", opt::value<std::string>()->default_value("none"), "Cartesian axis (x, y, or z) whose surface normal component gates surface anisotropy; 'none' applies it on all surfaces")
+			("surface aniso normal min", opt::value<double>()->default_value(0.9), "minimum |normal component| along 'surface aniso axis' required to keep surface anisotropy nonzero")
 			;
 
 	std::ifstream cfg_stream(configurationFile.c_str());
@@ -162,6 +164,10 @@ void ProgramSpecs::evalInput() {
 		}
 	} else {
 		useSTT = useDC || sttPulse;
+	}
+	if (surfaceAnisoAxis != "none" && surfaceAnisoAxis != "x" && surfaceAnisoAxis != "y" && surfaceAnisoAxis != "z") {
+		std::cerr << "Selected SURFACE ANISO AXIS (" << surfaceAnisoAxis << ") unknown. Use x, y, z, or none." << std::endl;
+		exit(1);
 	}
 }
 
@@ -237,6 +243,8 @@ if (vm.count("external field")) Hext = vm["external field"].as<double>();
 	if (vm.count("device number")) deviceNumber = vm["device number"].as<int>();	
 	if (vm.count("timer output"))showTimer = vm["timer output"].as<bool>();
 	if (vm.count("gamma"))gamma=vm["gamma"].as<double>();
+	if (vm.count("surface aniso axis")) surfaceAnisoAxis = toLower(vm["surface aniso axis"].as<std::string>());
+	if (vm.count("surface aniso normal min")) surfaceAnisoNormalMin = vm["surface aniso normal min"].as<double>();
 
 	defaultedCurrentType = vm["current type"].defaulted();
 	evalInput();

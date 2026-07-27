@@ -177,6 +177,8 @@ public:
 	double cgTol;	
 	bool showTimer;
 	double gamma;
+	std::string surfaceAnisoAxis;
+	double surfaceAnisoNormalMin;
 };
 
 

@@ -38,6 +38,7 @@
 #include <fstream>
 #include "Materials.h"
 #include "auxiliaries.h"
+#include <cmath>
 
 using namespace Eigen;
 enum coords {x, y, z};
@@ -52,7 +53,7 @@ void MeshData::ascribeMaterialsToNodes() {
 //	NodeMaterial = VectorXi::Zero(nx);
 	NodeMaterial = mat.assignMaterials(xyz);
 /*
- * Ks selection for Co wedge; only on bottom surface and with different values on each half of the surface
+ * Ks selection only on bottom surface and with different values on each half of the surface
  *
 	for (int i = 0; i < nx; ++i) {
 		NodeMaterial(i) = one; // positive Ks
@@ -66,27 +67,18 @@ void MeshData::ascribeMaterialsToNodes() {
 }
 
 
-void MeshData::selectAnisotropicSurfaces(VectorXd& Ks) {
+void MeshData::selectAnisotropicSurfaces(VectorXd& Ks, const std::string& axis, double normalMin) {
 
-(void) Ks;	// only to silence the "unused parameter" warning when nothing is selected
-
-//	Deselect the surfaces where surface anisotropy does not apply.
-//  The selection can be done using the node position xyz and/or the direction of the node normal vector nv_nx.
-//  Set Ks(i) to zero in the corresponding nodes i.
-//  Note: Node numbering is global, modified Ks vector will be returned by reference.
-//
-//  Example 1: select only surfaces located at z >= 0.4
-//	int nx = xyz.rows();
-//	for (int i = 0; i < nx; ++i) {
-//		if (xyz(i,z) < 0.4) Ks(i) = 0.0;
-//	}
-
-//	Example 2: Select only surfaces with y-component of the normal vector > 0.8
-//	int nx = xyz.rows();
-//	for (int i = 0; i < nx; ++i) {
-//		if (nv_nx(i, y) <= 0.8)
-//			Ks(i) = 0.0;
-//	}
+//	Deselects surfaces where surface anisotropy does not apply, keeping Ks(i) nonzero
+//  only on nodes whose normal vector nv_nx is aligned with the given Cartesian axis
+//  (|nv_nx(i, axis)| >= normalMin). Set 'surface aniso axis' to none in simulation.cfg
+//  to disable this filtering and apply Ks on all surfaces.
+	if (axis == "none") return;
+	int axisIndex = (axis == "x") ? x : (axis == "y") ? y : z;
+	int nx = xyz.rows();
+	for (int i = 0; i < nx; ++i) {
+		if (std::abs(nv_nx(i, axisIndex)) < normalMin) Ks(i) = 0.0;
+	}
 }
 
 
