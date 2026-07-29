@@ -1,6 +1,6 @@
 /*
     tetmag - A general-purpose finite-element micromagnetic simulation software package
-    Copyright (C) 2016-2023 CNRS and Université de Strasbourg
+    Copyright (C) 2016-2026 CNRS and Université de Strasbourg
 
     Author: Riccardo Hertel
 
@@ -57,20 +57,20 @@ SpMatCUDA::SpMatCUDA() : alpha(1.0), beta(0.0) {}
 
 
 SpMatCUDA::SpMatCUDA( const SpMat& m1_) : alpha(1.0), beta(0.0) {
-	SpMat_CM m1 = m1_; // copy into / enforce ColMajor format
+	SpMat m1 = m1_; // RowMajor storage is already CSR
 	m1.makeCompressed();
 	nnz = m1.nonZeros();
 	cols = m1.cols();
 	rows = m1.rows();
-	Eigen::VectorXd cscValA_h    = Map<VectorXd>( m1.valuePtr(), nnz );
-	Eigen::VectorXi	cscRowIndA_h = Map<VectorXi>( m1.innerIndexPtr(), nnz );
-	Eigen::VectorXi cscColPtrA_h = Map<VectorXi>( m1.outerIndexPtr(), m1.outerSize() + 1 );
-	cscVals_d.resize(cscValA_h.size());
-	cscVals_d = devVecD ( cscValA_h.data(), cscValA_h.data() + cscValA_h.size() );
-	cscCols_d.resize(cscColPtrA_h.size());
-	cscCols_d = devVecI ( cscColPtrA_h.data(), cscColPtrA_h.data() + cscColPtrA_h.size() );
-	cscRows_d.resize(cscRowIndA_h.size());
-	cscRows_d = devVecI ( cscRowIndA_h.data(), cscRowIndA_h.data() + cscRowIndA_h.size() );
+	Eigen::VectorXd csrValA_h    = Map<VectorXd>( m1.valuePtr(), nnz );
+	Eigen::VectorXi	csrColIndA_h = Map<VectorXi>( m1.innerIndexPtr(), nnz );
+	Eigen::VectorXi csrRowPtrA_h = Map<VectorXi>( m1.outerIndexPtr(), m1.outerSize() + 1 );
+	csrVals_d.resize(csrValA_h.size());
+	csrVals_d = devVecD ( csrValA_h.data(), csrValA_h.data() + csrValA_h.size() );
+	csrRowPtr_d.resize(csrRowPtrA_h.size());
+	csrRowPtr_d = devVecI ( csrRowPtrA_h.data(), csrRowPtrA_h.data() + csrRowPtrA_h.size() );
+	csrColInd_d.resize(csrColIndA_h.size());
+	csrColInd_d = devVecI ( csrColIndA_h.data(), csrColIndA_h.data() + csrColIndA_h.size() );
 	setOnDev();
 }
 
@@ -94,9 +94,9 @@ void SpMatCUDA::setOnDev() {
 
   // prepare sparse matrix:
   status =  cusparseCreateCsr(&matA, rows, cols, nnz,
-			      thrust::raw_pointer_cast(cscCols_d.data()),
-			      thrust::raw_pointer_cast(cscRows_d.data()),
-			      thrust::raw_pointer_cast(cscVals_d.data()),
+			      thrust::raw_pointer_cast(csrRowPtr_d.data()),
+			      thrust::raw_pointer_cast(csrColInd_d.data()),
+			      thrust::raw_pointer_cast(csrVals_d.data()),
 			      CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
 			      CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F);
   assert(status == CUSPARSE_STATUS_SUCCESS);
@@ -109,7 +109,7 @@ void SpMatCUDA::setOnDev() {
   cusparseCreateDnVec(&vecY, rows,
                       thrust::raw_pointer_cast(yDummy.data()), CUDA_R_64F);
 
-  status = cusparseSpMV_bufferSize( handle, CUSPARSE_OPERATION_TRANSPOSE,
+  status = cusparseSpMV_bufferSize( handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
 				   &alpha, matA, vecX, &beta, vecY, CUDA_R_64F,
 #if (CUDART_VERSION > 11000)
 				   CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize) ;
@@ -129,14 +129,14 @@ void SpMatCUDA::mvp(const devVecD& x, devVecD& y) {
   cusparseDnVecSetValues(vecX, const_cast<double*>(thrust::raw_pointer_cast(x.data())));
   cusparseDnVecSetValues(vecY, thrust::raw_pointer_cast(y.data()));
 
-  cusparseStatus_t stat = cusparseSpMV(handle, CUSPARSE_OPERATION_TRANSPOSE,
+  cusparseStatus_t stat = cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
 				       &alpha, matA, vecX, &beta, vecY, CUDA_R_64F,
 #if (CUDART_VERSION > 11000)
 				   CUSPARSE_SPMV_ALG_DEFAULT, dBuffer) ;
 #else
                                    CUSPARSE_MV_ALG_DEFAULT, dBuffer) ;
 #endif
-//  checkStatusCusparse(stat);
+  checkStatusCusparse(stat);
 }
 
 SpMatCUDA::~SpMatCUDA() {
@@ -145,7 +145,7 @@ SpMatCUDA::~SpMatCUDA() {
 	cusparseDestroySpMat(matA);
 	cusparseDestroy(handle);
 	cudaFree(dBuffer);
-	delete_vec(cscVals_d);
-	delete_vec(cscCols_d);
-	delete_vec(cscRows_d);
+	delete_vec(csrVals_d);
+	delete_vec(csrRowPtr_d);
+	delete_vec(csrColInd_d);
 }

@@ -1,6 +1,6 @@
 /*
     tetmag - A general-purpose finite-element micromagnetic simulation software package
-    Copyright (C) 2016-2025 CNRS and Université de Strasbourg
+    Copyright (C) 2016-2026 CNRS and Université de Strasbourg
 
     Author: Riccardo Hertel
 
@@ -30,6 +30,7 @@
 #include "TheLLG.h"
 
 #include <algorithm>
+#include <iostream>
 #include <vector>
 
 #ifdef _OPENMP
@@ -119,6 +120,8 @@ int CPU_Integrator::integrateCVODE(std::vector<double>& mag_vec,
     realtype abstol = 1.0e-6;
     realtype tout   = ode_start_t + ode_end_t;
 
+    long int maxNumSteps = 5000;
+
     if (cvode_mem_ == NULL)
     {
         flag = SUNContext_Create(NULL, &sunctx_);
@@ -146,6 +149,10 @@ int CPU_Integrator::integrateCVODE(std::vector<double>& mag_vec,
         if (flag != CV_SUCCESS)
             return 1;
 
+        flag = CVodeSetMaxNumSteps(cvode_mem_, maxNumSteps);
+        if (flag != CV_SUCCESS)
+            return 1;
+
         data_ = allocUserData(nx_);
         flag  = CVodeSetUserData(cvode_mem_, static_cast<void*>(data_.get()));
         if (flag != CV_SUCCESS)
@@ -166,12 +173,15 @@ int CPU_Integrator::integrateCVODE(std::vector<double>& mag_vec,
             return 1;
     }
 
+    flag = CVode(cvode_mem_, tout, m_, &t, CV_NORMAL);
+    if (flag < 0) {
+        std::cerr << "Warning: CPU integration reached t = " << t
+                  << " instead of " << tout << ", flag = " << flag << std::endl;
+        return 1;
+    }
+
     CVodeGetNumNonlinSolvIters(cvode_mem_, &its_nl);
     CVodeGetNumLinIters(cvode_mem_, &its_l);
-
-    flag = CVode(cvode_mem_, tout, m_, &t, CV_NORMAL);
-    if (flag < 0)
-        return 1;
 
     int its = static_cast<int>(its_nl + its_l);
     return its;

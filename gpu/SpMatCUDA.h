@@ -1,6 +1,6 @@
 /*
     tetmag - A general-purpose finite-element micromagnetic simulation software package
-    Copyright (C) 2016-2023 CNRS and Université de Strasbourg
+    Copyright (C) 2016-2026 CNRS and Université de Strasbourg
 
     Author: Riccardo Hertel
 
@@ -48,9 +48,9 @@ devVecD devVecXd(const Eigen::VectorXd& );
 
 class SpMatCUDA {
 private:
-	devVecD cscVals_d;
-	devVecI cscCols_d;
-	devVecI cscRows_d;
+	devVecD csrVals_d;
+	devVecI csrRowPtr_d;
+	devVecI csrColInd_d;
 	cusparseDnVecDescr_t vecX, vecY;
 	cusparseHandle_t handle;
 	cusparseSpMatDescr_t matA;

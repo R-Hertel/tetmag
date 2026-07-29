@@ -113,6 +113,7 @@ private:
     SUNContext                  sunctx_;
 
     thrust::device_vector<double> mag_vec_tmp_;
+    thrust::device_vector<double> rhs_mag_tmp_;
     thrust::device_vector<double> ret_vec_tmp_;
 
     static int rhs_d(realtype t, N_Vector u, N_Vector u_dot, void* user_data);

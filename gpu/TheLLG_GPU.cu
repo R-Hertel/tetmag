@@ -37,6 +37,7 @@
 #include <iostream>
 
 #include <thrust/copy.h>
+#include <thrust/device_ptr.h>
 #include <thrust/transform.h>
 #include <thrust/functional.h>
 #include <thrust/execution_policy.h>
@@ -150,6 +151,7 @@ GPU_Integrator::GPU_Integrator(TheLLG* llg, int nx)
     : llg_(llg), nx_(nx), m_gpu_(NULL), cvode_mem_(NULL), LS_(NULL), data_(), sunctx_(NULL)
 {
     mag_vec_tmp_.resize(3 * nx);
+    rhs_mag_tmp_.resize(3 * nx);
     ret_vec_tmp_.resize(3 * nx);
 }
 
@@ -188,8 +190,8 @@ int GPU_Integrator::rhs_d(realtype t, N_Vector u, N_Vector u_dot, void* user_dat
     realtype* udata  = N_VGetDeviceArrayPointer_Cuda(u);
     realtype* dudata = N_VGetDeviceArrayPointer_Cuda(u_dot);
 
-    thrust::copy_n(udata, N, self->mag_vec_tmp_.begin());
-    gpu_data->llg->operator()(self->mag_vec_tmp_, self->ret_vec_tmp_, t);
+    thrust::copy_n(thrust::device_pointer_cast(udata), N, self->rhs_mag_tmp_.begin());
+    gpu_data->llg->operator()(self->rhs_mag_tmp_, self->ret_vec_tmp_, t);
     cudaMemcpy(dudata,
                thrust::raw_pointer_cast(self->ret_vec_tmp_.data()),
                N * sizeof(realtype),
@@ -214,6 +216,8 @@ int GPU_Integrator::integrateCVODE(std::vector<double>& mag_vec,
     realtype abstol = 1.0e-6;
     realtype tout   = ode_start_t + ode_end_t;
 
+    long int maxNumSteps = 5000;
+
     mag_vec_tmp_ = mag_vec;
 
     if (cvode_mem_ == NULL)
@@ -228,6 +232,9 @@ int GPU_Integrator::integrateCVODE(std::vector<double>& mag_vec,
         if (m_gpu_ == NULL)
             return 1;
 
+        SUNCudaBlockReduceExecPolicy reducePolicy(256);
+        N_VSetKernelExecPolicy_Cuda(m_gpu_, NULL, &reducePolicy);
+
         cvode_mem_ = CVodeCreate(CV_ADAMS, sunctx_);
         if (cvode_mem_ == NULL)
             return 1;
@@ -237,6 +244,10 @@ int GPU_Integrator::integrateCVODE(std::vector<double>& mag_vec,
             return 1;
 
         flag = CVodeSStolerances(cvode_mem_, reltol, abstol);
+        if (flag != CV_SUCCESS)
+            return 1;
+
+        flag = CVodeSetMaxNumSteps(cvode_mem_, maxNumSteps);
         if (flag != CV_SUCCESS)
             return 1;
 
@@ -262,19 +273,20 @@ int GPU_Integrator::integrateCVODE(std::vector<double>& mag_vec,
 
     t    = t0;
     flag = CVode(cvode_mem_, tout, m_gpu_, &t, CV_NORMAL);
+
+    realtype* res_p = N_VGetDeviceArrayPointer_Cuda(m_gpu_);
+    thrust::copy_n(thrust::device_pointer_cast(res_p), N, mag_vec.begin());
+
+    llg_->updateDeviceMag(mag_vec_tmp_);
+
     if (flag < 0) {
-        std::cerr << "Warning: GPU integration failed, flag = " << flag << std::endl;
+        std::cerr << "Warning: GPU integration reached t = " << t
+                  << " instead of " << tout << ", flag = " << flag << std::endl;
         return 1;
     }
 
     CVodeGetNumNonlinSolvIters(cvode_mem_, &its_nl);
     CVodeGetNumLinIters(cvode_mem_, &its_l);
-
-    realtype* res_p = N_VGetDeviceArrayPointer_Cuda(m_gpu_);
-    thrust::copy(res_p, res_p + N, mag_vec_tmp_.begin());
-    thrust::copy(mag_vec_tmp_.begin(), mag_vec_tmp_.end(), mag_vec.begin());
-
-    llg_->updateDeviceMag(mag_vec_tmp_);
 
     int its = static_cast<int>(its_nl + its_l);
     return its;
