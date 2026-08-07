@@ -468,9 +468,9 @@ void TheLLG::setTime(double time)
     timeInPs = time;
 }
 
-void TheLLG::setDemagData(const DemagField& demag_)
+void TheLLG::setDemagData(std::shared_ptr<DemagField> demag_)
 {
-    demag = std::make_shared<DemagField>(demag_);
+    demag = demag_;
     freezeDemag = false;
     calcEffectiveField.emplace_back([this](MRef& m) { calcDemagField(m); });
 }

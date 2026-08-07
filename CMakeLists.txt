@@ -22,7 +22,7 @@
 #
 cmake_minimum_required(VERSION 3.18)
 
-project(tetmag VERSION 1.9.5 LANGUAGES C CXX)
+project(tetmag VERSION 1.9.6 LANGUAGES C CXX)
 # These options can be set with ccmake or with cmake -D 
 option(TETMAG_USE_OPENMP "Compile with OpenMP" ON)
 option(TETMAG_USE_CUDA "Enable CUDA" ON)
@@ -168,6 +168,8 @@ set(TETMAG_FILES
   ${MAIN}tetmag.cpp
   ${MAIN}AMGCLSolver.cpp
   ${UTILS}auxiliaries.cpp
+  ${MAIN}BEMOperator.cpp
+  ${MAIN}DemagCPU.cpp
   ${MAIN}DemagField.cpp
   ${MAIN}EffFieldCalc.cpp
   ${IO}GMSHReader.cpp

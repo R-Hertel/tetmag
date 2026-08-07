@@ -1,6 +1,6 @@
 /*
     tetmag - A general-purpose finite-element micromagnetic simulation software package
-    Copyright (C) 2016-2023 CNRS and Université de Strasbourg
+    Copyright (C) 2016-2026 CNRS and Université de Strasbourg
 
     Author: Riccardo Hertel
 
@@ -12,27 +12,28 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details. 
- 
-    Contact: Riccardo Hertel, IPCMS Strasbourg, 23 rue du Loess, 
+    GNU Affero General Public License for more details.
+
+    Contact: Riccardo Hertel, IPCMS Strasbourg, 23 rue du Loess,
     	     67034 Strasbourg, France.
 	     riccardo.hertel@ipcms.unistra.fr
-	     
+
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 /*
- * GpuPotential.cu
+ * DemagGPU.cu
  *
- *  Created on: Jun 15, 2018
+ *  Created on: Aug 7, 2026
  *      Author: riccardo
  */
 
-#include "GpuPotential.h"
-#include <iostream>
-#include <Eigen/Dense>
+#include "DemagGPU.h"
+#include "PhysicalConstants.h"
 #include "SpMatCUDA.h"
+#include <Eigen/Dense>
+#include <thrust/copy.h>
 #include <thrust/transform.h>
 #include <thrust/functional.h>
 #include <thrust/tuple.h>
@@ -52,18 +53,17 @@ struct sumOfThree {
         }
 };
 
-void GpuPotential::setGradientMatrices(const SpMat& tGradX, const SpMat& tGradY, const SpMat& tGradZ, 
-									   const SpMat& gradX,  const SpMat& gradY,  const SpMat& gradZ, const VectorXd& Js) 
-{
-	gradX_cuda = std::make_shared<SpMatCUDA>( gradX );
-	gradY_cuda = std::make_shared<SpMatCUDA>( gradY );
-	gradZ_cuda = std::make_shared<SpMatCUDA>( gradZ );
+
+DemagGPU::DemagGPU(size_t nx_, const SpMat& tGradX, const SpMat& tGradY, const SpMat& tGradZ,
+		const SpMat& gradX, const SpMat& gradY, const SpMat& gradZ, const VectorXd& Js) :
+		nx(nx_) {
+	negGradX_cuda = std::make_shared<SpMatCUDA>( -gradX );
+	negGradY_cuda = std::make_shared<SpMatCUDA>( -gradY );
+	negGradZ_cuda = std::make_shared<SpMatCUDA>( -gradZ );
 
 	tGradX_cuda = std::make_shared<SpMatCUDA>( tGradX );
 	tGradY_cuda = std::make_shared<SpMatCUDA>( tGradY );
 	tGradZ_cuda = std::make_shared<SpMatCUDA>( tGradZ );
-
-	nx = gradX.rows();
 
 	mx_dev = std::make_shared<devVecD>(nx);
 	my_dev = std::make_shared<devVecD>(nx);
@@ -71,20 +71,27 @@ void GpuPotential::setGradientMatrices(const SpMat& tGradX, const SpMat& tGradY,
 	x_tmp  = std::make_shared<devVecD>(nx);
 	y_tmp  = std::make_shared<devVecD>(nx);
 	z_tmp  = std::make_shared<devVecD>(nx);
-	divM_h.resize(nx);
-	Hdem_vec.resize(3 * nx);
 
 	divM_d = std::make_shared<devVecD>(nx);
 	u_dev = std::make_shared<devVecD>(nx);
 	Jx = std::make_shared<devVecD>(nx);
 	Jy = std::make_shared<devVecD>(nx);
 	Jz = std::make_shared<devVecD>(nx);
-	Js_dev= std::make_shared<devVecD>(nx);
+	Js_dev = std::make_shared<devVecD>(nx);
 	thrust::copy(Js.data(), Js.data() + nx, Js_dev->begin());
+
+	divM.resize(nx);
+	Hdem = MatrixXd::Zero(nx, 3);
 }
 
 
-Matrix<value_type, Dynamic, 1> GpuPotential::calcDivM(const MatrixXd& mag) {
+void DemagGPU::setSolvers(std::shared_ptr<SolverFactory> neumann, std::shared_ptr<SolverFactory> dirichlet) {
+	neumannSolver = neumann;
+	dirichletSolver = dirichlet;
+}
+
+
+void DemagGPU::setMagnetization(MRef& mag) {
 	thrust::copy( mag.col(x).data(), mag.col(x).data() + nx, mx_dev->begin() );
 	thrust::copy( mag.col(y).data(), mag.col(y).data() + nx, my_dev->begin() );
 	thrust::copy( mag.col(z).data(), mag.col(z).data() + nx, mz_dev->begin() );
@@ -92,7 +99,10 @@ Matrix<value_type, Dynamic, 1> GpuPotential::calcDivM(const MatrixXd& mag) {
 	thrust::transform(mx_dev->begin(), mx_dev->end(), Js_dev->begin(), Jx->begin(), thrust::multiplies<double>());
 	thrust::transform(my_dev->begin(), my_dev->end(), Js_dev->begin(), Jy->begin(), thrust::multiplies<double>());
 	thrust::transform(mz_dev->begin(), mz_dev->end(), Js_dev->begin(), Jz->begin(), thrust::multiplies<double>());
+}
 
+
+void DemagGPU::computeRhs() {
 	tGradX_cuda->mvp(*Jx, *x_tmp);
 	tGradY_cuda->mvp(*Jy, *y_tmp);
 	tGradZ_cuda->mvp(*Jz, *z_tmp);
@@ -100,24 +110,65 @@ Matrix<value_type, Dynamic, 1> GpuPotential::calcDivM(const MatrixXd& mag) {
 	thrust::transform(
 			thrust::make_zip_iterator(thrust::make_tuple(x_tmp->begin(), y_tmp->begin(), z_tmp->begin() )),
 			thrust::make_zip_iterator(thrust::make_tuple(x_tmp->end()  , y_tmp->end()  , z_tmp->end()   )),
-			divM_d->begin(), sumOfThree<value_type>() );
+			divM_d->begin(), sumOfThree<double>() );
 
-	thrust::copy(divM_d->begin(), divM_d->end(), divM_h.begin());
-	return Map<const Matrix<value_type, Dynamic, 1> >(divM_h.data(), nx); // If value_type is 'double', the return type is VectorXd
+	thrust::copy(divM_d->begin(), divM_d->end(), divM.data());
+	divM /= PhysicalConstants::mu0;
 }
 
 
-Matrix<value_type, Dynamic, Dynamic> GpuPotential::calcGradientField(const VectorXd& u){
+void DemagGPU::solvePoisson() {
+	neumannSolver->setLoadVector(divM);
+	neumannSolver->solve();
+	u1 = neumannSolver->result();
+}
+
+
+const VectorXd& DemagGPU::poissonPotential() {
+	return u1;
+}
+
+
+void DemagGPU::setBoundaryValues(const Eigen::Ref<const VectorXd>& boundaryValues_) {
+	boundaryValues = boundaryValues_;
+}
+
+
+void DemagGPU::solveLaplace() {
+	dirichletSolver->setLoadVector(boundaryValues);
+	dirichletSolver->solve();
+	u2 = dirichletSolver->result();
+}
+
+
+void DemagGPU::computeField() {
+	const VectorXd u = u1 + u2;
 	thrust::copy(u.data(), u.data() + nx, u_dev->begin());
 
-	gradX_cuda->mvp(*u_dev, *x_tmp);
-	gradY_cuda->mvp(*u_dev, *y_tmp);
-	gradZ_cuda->mvp(*u_dev, *z_tmp);
+	negGradX_cuda->mvp(*u_dev, *x_tmp);
+	negGradY_cuda->mvp(*u_dev, *y_tmp);
+	negGradZ_cuda->mvp(*u_dev, *z_tmp);
 
-	thrust::copy(x_tmp->begin(), x_tmp->end(), Hdem_vec.begin() );
-	thrust::copy(y_tmp->begin(), y_tmp->end(), Hdem_vec.begin() + nx );
-	thrust::copy(z_tmp->begin(), z_tmp->end(), Hdem_vec.begin() + 2 * nx );
+	thrust::copy(x_tmp->begin(), x_tmp->end(), Hdem.col(x).data());
+	thrust::copy(y_tmp->begin(), y_tmp->end(), Hdem.col(y).data());
+	thrust::copy(z_tmp->begin(), z_tmp->end(), Hdem.col(z).data());
+}
 
-	thrust::transform(Hdem_vec.begin(), Hdem_vec.end(), Hdem_vec.begin(), thrust::negate<value_type>());
-	return Map<const Matrix<value_type, Dynamic, Dynamic> >(Hdem_vec.data(), nx, 3);
+
+const MatrixXd& DemagGPU::field() {
+	return Hdem;
+}
+
+
+std::shared_ptr<DemagBackend> makeDemagGPU(std::shared_ptr<DemagGPU> impl) {
+	std::shared_ptr<DemagBackend> ops = std::make_shared<DemagBackend>();
+	ops->setMagnetization  = [impl](MRef& m) -> void { impl->setMagnetization(m); };
+	ops->computeRhs        = [impl]() -> void { impl->computeRhs(); };
+	ops->solvePoisson      = [impl]() -> void { impl->solvePoisson(); };
+	ops->poissonPotential  = [impl]() -> const VectorXd& { return impl->poissonPotential(); };
+	ops->setBoundaryValues = [impl](const Eigen::Ref<const VectorXd>& b) -> void { impl->setBoundaryValues(b); };
+	ops->solveLaplace      = [impl]() -> void { impl->solveLaplace(); };
+	ops->computeField      = [impl]() -> void { impl->computeField(); };
+	ops->field             = [impl]() -> const MatrixXd& { return impl->field(); };
+	return ops;
 }

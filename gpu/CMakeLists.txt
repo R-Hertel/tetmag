@@ -47,7 +47,7 @@ set(CMAKE_CUDA_ARCHITECTURES "${GPU_ARCHITECTURES}")
 set(CUDA_FILES
   ${GPU}EffFieldGPU.cu
   ${GPU}TheLLG_GPU.cu
-  ${GPU}GpuPotential.cu
+  ${GPU}DemagGPU.cu
   ${GPU}GPUSolver.cu
   ${GPU}SetDevice.cu
   ${GPU}SpMatCUDA.cu

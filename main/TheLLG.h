@@ -57,7 +57,7 @@ class GPU_Integrator;
 typedef std::vector<double> state_type;
 
 
-class TheLLG : public std::enable_shared_from_this<TheLLG> {
+class TheLLG {
 public:
     TheLLG(SimulationData&, const MeshData&, int);
     ~TheLLG();
@@ -82,7 +82,7 @@ public:
     double getDirectDMI(MRef&);
     double getMaxTorque(MRef&);
 
-    void setDemagData(const DemagField&);
+    void setDemagData(std::shared_ptr<DemagField>);
     void setSTTData(const STT&);
     void setZeemanField(int, double, double, double, double, double, double);
     void setHdem(MRef&);

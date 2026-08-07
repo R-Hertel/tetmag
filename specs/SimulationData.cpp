@@ -72,7 +72,7 @@ void SimulationData::getProgramData(ProgramSpecs& prog) {
 	Hp.rfFrequency /= 1.e3;  // convert input data from GHz to 1/ps
 	Hp.rfOmega = 2. * PhysicalConstants::pi * Hp.rfFrequency;
 	Hp.staticLocalAmplitude /= PhysicalConstants::mu0; // convert T -> A/m
-	useGPU = (prog.solverType == "gpu" || prog.solverType == "pl");
+	useGPU = (prog.solverType == "gpu");
 	gamma = prog.gamma;
 
 }

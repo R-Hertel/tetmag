@@ -12,16 +12,16 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details. 
- 
-    Contact: Riccardo Hertel, IPCMS Strasbourg, 23 rue du Loess, 
+    GNU Affero General Public License for more details.
+
+    Contact: Riccardo Hertel, IPCMS Strasbourg, 23 rue du Loess,
     	     67034 Strasbourg, France.
 	     riccardo.hertel@ipcms.unistra.fr
-	     
+
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-    
+
 /*
  * DemagField.h
  *
@@ -37,21 +37,15 @@
 #include <string>
 #include "SolverFactory.h"
 #include "MeshData.h"
-#ifdef USE_CUDA
-#include "GpuPotential.h"
-#endif
+#include "BEMOperator.h"
+#include "DemagBackend.h"
 #include "typedefs.h"
 #include "Timer.h"
 #include <memory> // for std:::shared_ptr
 
-typedef double* pvector;
-
 class DemagField {
 private:
 	size_t nx;
-	size_t bnx;
-	std::vector<int> boundaryNodes;
-	Eigen::MatrixXd dirichletBEM;
 	SpMat dirichletMatrix;
 	SpMat neumannMatrix;
 	int fixedNeumannNode; // value must be set at one node since the solution of the pure Neumann problem is not unique
@@ -59,33 +53,15 @@ private:
 	SpMat gradX, gradY, gradZ;
 	Eigen::VectorXd Js;
 	Eigen::VectorXd NodeVolume;
-	bool useH2;
-	Eigen::MatrixXd Hdem;
 	void prepareNeumannMatrix();
-	Eigen::VectorXd rhsPoisson(MRef &);
-	Eigen::VectorXd solvePoisson(const Eigen::Ref<const Eigen::VectorXd>&);
-	Eigen::VectorXd solveLaplace(const Eigen::Ref<const Eigen::VectorXd>&);
-	Eigen::VectorXd boundaryIntegral(const Eigen::Ref<const Eigen::VectorXd>&);
-	Eigen::VectorXd h2MVP(Eigen::VectorXd&);
-//	Eigen::VectorXd hMVP(Eigen::VectorXd&);
-	Eigen::VectorXd denseMVP(Eigen::VectorXd&);
-	using MVPfn = Eigen::VectorXd (DemagField::*)(Eigen::VectorXd&);
-	MVPfn selectedMVPtype;
-	Eigen::VectorXd mvp(Eigen::VectorXd&);
-	std::shared_ptr<SolverFactory> dirichletSolver;
-	std::shared_ptr<SolverFactory> neumannSolver;
-	Eigen::VectorXd calcPotential(MRef &);
-	Eigen::MatrixXd calcGradientField(const Eigen::Ref<const Eigen::VectorXd>&);
-	bool useGPU;
+	std::shared_ptr<SolverFactory> makeAndSetupSolver(const std::string&, const std::string&, const SpMat&, const std::string&);
+	std::shared_ptr<BEMOperator> bem;
+	std::shared_ptr<DemagBackend> backend;
 	double cgTol;
 
 	Timer u1Timer, h2Timer, u2Timer, demagTimer;
-#ifdef USE_CUDA
-	GpuPotential gpuField;
-#endif
 public:
 	void outputTimer();
-	Eigen::VectorXd getDivM(MRef &);
 	DemagField(const MeshData&, const Eigen::VectorXd& , bool);
 	double getDemagEnergy(const Eigen::Ref<const Eigen::MatrixXd>&);
 	Eigen::MatrixXd calcField(MRef &);

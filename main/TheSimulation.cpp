@@ -120,9 +120,9 @@ void TheSimulation::start() {
 	ProcessInformation process;
 	writeProcessInformationFile(process, msh.name);
 	realTimeScale = sd.psTimeScaleFactor();
-	DemagField demag(msh, sd.Js, prog.useH2);
+	std::shared_ptr<DemagField> demag = std::make_shared<DemagField>(msh, sd.Js, prog.useH2);
 	std::cout << "Preparing solvers... " << std::flush;
-	demag.initializeSolvers(prog.solverType, prog.preconditionerType, prog.cgTol);
+	demag->initializeSolvers(prog.solverType, prog.preconditionerType, prog.cgTol);
 	std::cout << "done." << std::endl;
 //
 //	bool calcDemag = (!prog.noDemag && prog.freezeDemag);
@@ -175,7 +175,7 @@ void TheSimulation::start() {
 	LLG.initIntegrator();
 	LLG.setMag(mag);
 	if (calcDemag) {
-		LLG.setHdem(demag.calcField(mag));
+		LLG.setHdem(demag->calcField(mag));
 	} else {
 		LLG.setHdem(MatrixXd::Zero(nx, 3));
 	}
@@ -220,7 +220,7 @@ void TheSimulation::start() {
 			totalTimer.start();
 			pdeTimer.start();
 			if (calcDemag)
-				LLG.setHdem(demag.calcField(mag));
+				LLG.setHdem(demag->calcField(mag));
 		    pdeTimer.add();
 			outputTimer.start();
 			LLG.setTime(elapsed_ps);
@@ -232,12 +232,12 @@ void TheSimulation::start() {
 				nextGraphicsOutput += prog.cfgStride;
 			}
 			if (timeReached(elapsed_ps, nextConsoleOutput)) {
-				calculateEnergies(std::ref(LLG), std::ref(demag), calcDemag);
+				calculateEnergies(std::ref(LLG), *demag, calcDemag);
 				displayEnergies(elapsed_ps);
 				nextConsoleOutput += prog.consoleStride;
 			}
 			if (timeReached(elapsed_ps, nextLogOutput)) {
-				calculateEnergies(std::ref(LLG), std::ref(demag), calcDemag);
+				calculateEnergies(std::ref(LLG), *demag, calcDemag);
 				writeLogStream(logstream, elapsed_ps, maximumTorque);
 				nextLogOutput += prog.logStride;
 			}
@@ -271,11 +271,11 @@ void TheSimulation::start() {
 //////////////////////////////////////////End of main loop /////////////////////////////////////////////////////////////
 
 		// writing final output:
-		calculateEnergies(std::ref(LLG), std::ref(demag), calcDemag);
+		calculateEnergies(std::ref(LLG), *demag, calcDemag);
 		writeLogStream(logstream, elapsed_ps, maximumTorque);
 		displayEnergies(elapsed_ps);
 		write.addVectorVTK(mag, "Magnetization");
-		write.addVectorVTK(demag.calcField(mag), "Demag");
+		write.addVectorVTK(demag->calcField(mag), "Demag");
 		write.closeVTK();
 
 		if (sd.Hys) {
@@ -309,7 +309,7 @@ void TheSimulation::start() {
 
 	if (prog.showTimer) {
 		showTimer();
-		demag.outputTimer();
+		demag->outputTimer();
 //		LLG.outputTimer();
 	}
 	writeLogFileFooter(logstream);
