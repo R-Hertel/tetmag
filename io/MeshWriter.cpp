@@ -169,6 +169,7 @@ void MeshWriter::outputVTK(std::string filename, const MatrixXd& vec, double tim
 	vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 	writer->SetFileName(filename.c_str());
 	writer->SetInputData(unstructuredGrid);
+	writer->SetDataModeToBinary();
 	writer->Write();
 }
 
@@ -190,6 +191,7 @@ void MeshWriter::closeVTK() {
 	vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 	writer->SetFileName(filename.c_str());
 	writer->SetInputData(unstructuredGrid);
+	writer->SetDataModeToBinary();
 	writer->Write();
 	unstructuredGrid->GetPointData()->Initialize();
 	unstructuredGrid->GetFieldData()->Initialize();
@@ -214,6 +216,7 @@ void MeshWriter::writeBoundaryVTK(const MatrixXi& bel_b, const MatrixXd& bxyz) {
 	vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 	writer->SetFileName("boundary.vtu");
 	writer->SetInputData(grid);
+	writer->SetDataModeToBinary();
 	writer->Write();
 }
 

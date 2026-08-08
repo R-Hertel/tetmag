@@ -38,6 +38,7 @@
 #include <vtkPolyData.h>
 #include <vtkDoubleArray.h>
 #include <vtkCellIterator.h>
+#include <vtkCellType.h>
 #include <iostream>
 #include "VTKReader.h"
 #include <boost/filesystem/path.hpp>
@@ -144,13 +145,25 @@ MatrixXi VTKReader::readCellsGeneric(vtkSmartPointer<T> reader) {
 	vtkSmartPointer<vtkCellIterator> cellIter = vtkSmartPointer<vtkCellIterator>::Take(reader->GetOutput()->NewCellIterator());
 	cellIter->InitTraversal();
 	int count = 0;
+	int nonTetrahedra = 0;
 	for (cellIter->InitTraversal(); !cellIter->IsDoneWithTraversal(); cellIter->GoToNextCell()) {
+		if (cellIter->GetCellType() != VTK_TETRA || cellIter->GetNumberOfPoints() != 4) {
+			++nonTetrahedra;
+			continue;
+		}
 		for (int j = 0; j < 4; ++j) {
 			fel(count, j) = cellIter->GetPointIds()->GetId(j);
 		}
 		++count;
 	}
-	return fel;
+	if (count == 0) {
+		std::cerr << "ERROR: No tetrahedral cells found in file " << file << "." << std::endl;
+		exit(1);
+	}
+	if (nonTetrahedra > 0) {
+		std::cerr << "Warning: Ignored " << nonTetrahedra << " non-tetrahedral cells in file " << file << "." << std::endl;
+	}
+	return fel.topRows(count);
 }
 
 
@@ -159,16 +172,28 @@ MatrixXd VTKReader::readMagGeneric(vtkSmartPointer<T> reader) {
 	reader->SetFileName(file.c_str());
 	reader->Update();
 	unsigned int nx = reader->GetOutput()->GetNumberOfPoints();
+	if (nx == 0) {
+		std::cerr << "ERROR: The VTK library could not parse the file " << file << "." << std::endl;
+		std::cerr << "Files using VTK's appended data format cannot be read by some packaged VTK builds." << std::endl;
+		std::cerr << "Rewrite the file with ParaView, or link tetmag against a VTK built from source." << std::endl;
+		exit(1);
+	}
     bool found = reader->GetOutput()->GetPointData()->HasArray("Magnetization");
 	if (!found) {
-		std::cerr << "No data on the magnetization found in file " << file << std::endl;				
-		return MatrixXd::Zero(0,0);
+		std::cerr << "No data on the magnetization found in file " << file << std::endl;
+		exit(1);
+	}
+	vtkSmartPointer<vtkDataArray> mag_p = reader->GetOutput()->GetPointData()->GetArray("Magnetization");
+	if (mag_p->GetNumberOfComponents() != 3 || mag_p->GetNumberOfTuples() != static_cast<vtkIdType>(nx)) {
+		std::cerr << "ERROR: The magnetization in file " << file << " has " << mag_p->GetNumberOfComponents()
+				  << " components and " << mag_p->GetNumberOfTuples() << " tuples, expected 3 and " << nx << "." << std::endl;
+		exit(1);
 	}
 	MatrixXd mag(nx, 3);
 	for (uint i = 0; i < nx; ++i) {
-       vtkSmartPointer < vtkDataArray > mag_p = reader->GetOutput()->GetPointData()->GetArray("Magnetization");
+		const double* tuple = mag_p->GetTuple3(i);
 		for (uint j = 0; j < 3; ++j) {
-	       mag(i, j) = mag_p->GetTuple3(i)[j];
+			mag(i, j) = tuple[j];
 		}
 	}
 
