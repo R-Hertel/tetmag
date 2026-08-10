@@ -63,15 +63,12 @@ bool AMGCLSolver::setup(SpMat& A_) {
     n = A.cols();
     b_n.resize(n);
     x_n.resize(n);
-    for (int i = 0; i < n; ++i){
-    	x_n[i] = 0.;
-    }
     A.makeCompressed();
     std::vector<int> col(nnz);
     std::vector<int> ptr(A.outerSize() + 1);
     std::vector<double> val(nnz);
 
-    x.resize(n);
+    x = Eigen::VectorXd::Zero(n);
 //    x_h.resize(n);
 //    b_h.resize(n);
     std::copy( A.valuePtr(), A.valuePtr( ) + nnz , val.begin());
