@@ -141,3 +141,7 @@ Instead of using compiler flags, a convenient way to set various parameters and 
 .. image:: ./../figs/install/ccmake_terminal.png
 
 
+Installation of environment with pixi
+-------------------------------------
+
+See `installation with pixi <installation-pixi.html>`__.
