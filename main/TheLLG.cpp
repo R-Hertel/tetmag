@@ -105,8 +105,11 @@ TheLLG::TheLLG(SimulationData& sd, const MeshData& msh, int LLGVersion)
         gpucalc->setExchangeMatOnDev(XC_field_OP);
         if (useDMI) {
             std::cout << "setting gradient matrices on device" << std::endl;
-            gpucalc->setGradientMatsOnDev(-msh.tGradX, -msh.tGradY, -msh.tGradZ);
-            gpucalc->setDMIdata(sd.D, invNodeVol, msh.nv_nx, msh.nodeArea);
+            gpucalc->setDMIGradientMatsOnDev(
+                0.5 * (SpMat(msh.tGradX.transpose()) - msh.tGradX),
+                0.5 * (SpMat(msh.tGradY.transpose()) - msh.tGradY),
+                0.5 * (SpMat(msh.tGradZ.transpose()) - msh.tGradZ));
+            gpucalc->setDMIdata(sd.D, invNodeVol);
         }
 #endif
     }

@@ -50,9 +50,9 @@ class EffFieldCalc {
 	Eigen::VectorXd Ksn; // Ks at nodes, zero for non-boundary nodes.
 	Eigen::VectorXd nodeSurfaceArea;
 	Eigen::MatrixXd nv_nx; // normal surface vector, defined at all nodes. Zero vector for non-boundary nodes. Normalized.
-	SpMat tGradX;
-	SpMat tGradY;
-	SpMat tGradZ;
+	SpMat skewGradX;
+	SpMat skewGradY;
+	SpMat skewGradZ;
 	SpMat gradX;
 	SpMat gradY;
 	SpMat gradZ;	
@@ -71,7 +71,6 @@ class EffFieldCalc {
 	void setUniaxialAnisotropy();
 	void setSurfaceAnisotropy();
 	Eigen::MatrixXd curlM(MRef&);
-	Eigen::MatrixXd surfIntDMI(MRef&);
 public:
 	EffFieldCalc(SimulationData&, const MeshData&);
 

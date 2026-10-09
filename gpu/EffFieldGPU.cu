@@ -148,12 +148,12 @@ void EffFieldGPU::UTermSTT_GPU() {
 
 void EffFieldGPU::calcCurlM() {
 
-  tGradY_cuda->mvp(*mz_d, *cmx1);
-  tGradZ_cuda->mvp(*my_d, *cmx2);
-  tGradZ_cuda->mvp(*mx_d, *cmy1);
-  tGradX_cuda->mvp(*mz_d, *cmy2);
-  tGradX_cuda->mvp(*my_d, *cmz1);
-  tGradY_cuda->mvp(*mx_d, *cmz2);
+  skewGradY_cuda->mvp(*mz_d, *cmx1);
+  skewGradZ_cuda->mvp(*my_d, *cmx2);
+  skewGradZ_cuda->mvp(*mx_d, *cmy1);
+  skewGradX_cuda->mvp(*mz_d, *cmy2);
+  skewGradX_cuda->mvp(*my_d, *cmz1);
+  skewGradY_cuda->mvp(*mx_d, *cmz2);
 
   thrust::transform( cmx1->begin(), cmx1->end(), cmx2->begin(), curlM->begin(), thrust::minus<value_type>() );
   thrust::transform( cmy1->begin(), cmy1->end(), cmy2->begin(), curlM->begin() + nx, thrust::minus<value_type>() );
@@ -189,10 +189,10 @@ void EffFieldGPU::setMagDev( const devVecD& mag_vec ) {
   copyTimer.add();
 }
 
-void EffFieldGPU::setGradientMatsOnDev( const SpMat& tGradX, const SpMat& tGradY, const SpMat& tGradZ ) {
-	tGradX_cuda = std::make_shared<SpMatCUDA>( tGradX );
-	tGradY_cuda = std::make_shared<SpMatCUDA>( tGradY );
-	tGradZ_cuda = std::make_shared<SpMatCUDA>( tGradZ );
+void EffFieldGPU::setDMIGradientMatsOnDev( const SpMat& dmiSkewGradX, const SpMat& dmiSkewGradY, const SpMat& dmiSkewGradZ ) {
+	skewGradX_cuda = std::make_shared<SpMatCUDA>( dmiSkewGradX );
+	skewGradY_cuda = std::make_shared<SpMatCUDA>( dmiSkewGradY );
+	skewGradZ_cuda = std::make_shared<SpMatCUDA>( dmiSkewGradZ );
 }
 
 void EffFieldGPU::setExchangeMatOnDev(const SpMat& XC_h) {
@@ -221,7 +221,6 @@ void EffFieldGPU::init(int nx) {
 	cmz1 = std::make_shared<dev_vec>(nx);
 	cmz2 = std::make_shared<dev_vec>(nx);
 	curlM = std::make_shared<dev_vec>(3 * nx);
-	surfTerm = std::make_shared<dev_vec>(3 * nx);
 	Hxcx_d = std::make_shared<dev_vec>(nx);
 	Hxcy_d = std::make_shared<dev_vec>(nx);
 	Hxcz_d = std::make_shared<dev_vec>(nx);
@@ -271,21 +270,9 @@ void EffFieldGPU::setSTTDataOnDevice(const SpMat& GradX, const SpMat& GradY, con
 	u_term_stt = std::make_shared < dev_vec >( 3 * nx );
 }
 
-void EffFieldGPU::setDMIdata(const VectorXd& D, const VectorXd& invNodeVol,const MatrixXd& nv_n, const VectorXd& nodesurface_h) {
+void EffFieldGPU::setDMIdata(const VectorXd& D, const VectorXd& invNodeVol) {
 	assert(nx == D.size());
-	dev_vec nv_x(nx), nv_y(nx), nv_z(nx);
 	dev_vec dmival(nx), invnodevol(nx);
-	dev_vec nodesurface(nx);
-	thrust::copy(nodesurface_h.data(), nodesurface_h.data() + nx, nodesurface.begin());
-	thrust::copy(nv_n.col(x).data(), nv_n.col(x).data() + nx, nv_x.begin());
-	thrust::copy(nv_n.col(y).data(), nv_n.col(y).data() + nx, nv_y.begin());
-	thrust::copy(nv_n.col(z).data(), nv_n.col(z).data() + nx, nv_z.begin());
-	nv_surf_x = std::make_shared<dev_vec>(nx);
-	nv_surf_y = std::make_shared<dev_vec>(nx);
-	nv_surf_z = std::make_shared<dev_vec>(nx);
-	*nv_surf_x = cwiseProduct(nv_x, nodesurface);
-	*nv_surf_y = cwiseProduct(nv_y, nodesurface);
-	*nv_surf_z = cwiseProduct(nv_z, nodesurface);
 
 	thrust::copy(invNodeVol.data(), invNodeVol.data() + nx, invnodevol.begin());
 	thrust::copy(D.data(), D.data() + nx, dmival.begin());
@@ -511,62 +498,10 @@ Matrix<double, Dynamic, Dynamic> EffFieldGPU::UniaxialAnisotropyField() {
 }
 
 
-struct Cross_GPU {
-    template < class Tuple >
-    __device__
-    void operator() ( Tuple t ) const  {
-      Matrix<value_type , 3 , 1> a, b, axb;
-
-      a(x) = thrust::get<0>( t );
-      a(y) = thrust::get<1>( t );
-      a(z) = thrust::get<2>( t );
-
-      b(x) = thrust::get<3>( t );
-      b(y) = thrust::get<4>( t );
-      b(z) = thrust::get<5>( t );
-
-      axb = a.cross(b);
-      thrust::get<6>( t ) = axb(x);
-      thrust::get<7>( t ) = axb(y);
-      thrust::get<8>( t ) = axb(z);
-    }
-};
-
-
-struct DMI_OP {
-	template<class Tuple>
-	__host__ __device__
-	value_type operator()(Tuple t) const {
-		value_type v1, v2, v3;
-		thrust::tie(v1, v2, v3) = t;
-		return (v1 - 2. * v2) * v3;
-	}
-};
-
-
 Matrix<double, Dynamic, Dynamic> EffFieldGPU::DMIField() {
-//	Hdmi = (surfIntDMI(Mag) - 2. * CurlM(Mag)).array().colwise() * invNodeVol.cwiseProduct(D).array(); //
-
 	calcCurlM();
-
-	thrust::for_each(
-			thrust::make_zip_iterator(
-					thrust::make_tuple(mx_d->begin(), my_d->begin(), mz_d->begin(),
-							nv_surf_x->begin(), nv_surf_y->begin(), nv_surf_z->begin(),
-							surfTerm->begin(), surfTerm->begin() + nx, surfTerm->begin() + 2 * nx)),
-			thrust::make_zip_iterator(
-					thrust::make_tuple(mx_d->end(), my_d->end(), mz_d->end(),
-							nv_surf_x->end(), nv_surf_y->end(), nv_surf_z->end(),
-							surfTerm->begin() + nx, surfTerm->begin() + 2 * nx, surfTerm->begin() + 3 * nx) ),
-							Cross_GPU());
-
-	thrust::transform(
-			thrust::make_zip_iterator(
-					thrust::make_tuple(surfTerm->begin(), curlM->begin(),dmi_fac->begin())),
-			thrust::make_zip_iterator(
-					thrust::make_tuple(surfTerm->end(), curlM->end(), dmi_fac->end())),
-					dmi3->begin(),
-					DMI_OP());
+	thrust::transform(curlM->begin(), curlM->end(), dmi_fac->begin(),
+			dmi3->begin(), -2. * thrust::placeholders::_1 * thrust::placeholders::_2);
 
 	thrust::host_vector<value_type> ret_h = *dmi3;
 	return Map<Matrix<value_type, Dynamic, Dynamic> >(ret_h.data(), nx, 3);
@@ -598,20 +533,8 @@ void EffFieldGPU::computeAndAccumulateHeff(bool useUniaxial, bool useDMI) {
 
 	if (useDMI) {
 		calcCurlM();
-		thrust::for_each(
-			thrust::make_zip_iterator(thrust::make_tuple(
-				mx_d->begin(), my_d->begin(), mz_d->begin(),
-				nv_surf_x->begin(), nv_surf_y->begin(), nv_surf_z->begin(),
-				surfTerm->begin(), surfTerm->begin() + nx, surfTerm->begin() + 2 * nx)),
-			thrust::make_zip_iterator(thrust::make_tuple(
-				mx_d->end(), my_d->end(), mz_d->end(),
-				nv_surf_x->end(), nv_surf_y->end(), nv_surf_z->end(),
-				surfTerm->begin() + nx, surfTerm->begin() + 2 * nx, surfTerm->begin() + 3 * nx)),
-			Cross_GPU());
-		thrust::transform(
-			thrust::make_zip_iterator(thrust::make_tuple(surfTerm->begin(), curlM->begin(), dmi_fac->begin())),
-			thrust::make_zip_iterator(thrust::make_tuple(surfTerm->end(),   curlM->end(),   dmi_fac->end())),
-			dmi3->begin(), DMI_OP());
+		thrust::transform(curlM->begin(), curlM->end(), dmi_fac->begin(),
+			dmi3->begin(), -2. * thrust::placeholders::_1 * thrust::placeholders::_2);
 		thrust::transform(heffx_d->begin(), heffx_d->end(), dmi3->begin(),          heffx_d->begin(), thrust::plus<value_type>());
 		thrust::transform(heffy_d->begin(), heffy_d->end(), dmi3->begin() + nx,     heffy_d->begin(), thrust::plus<value_type>());
 		thrust::transform(heffz_d->begin(), heffz_d->end(), dmi3->begin() + 2 * nx, heffz_d->begin(), thrust::plus<value_type>());

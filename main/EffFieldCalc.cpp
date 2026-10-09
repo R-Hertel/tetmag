@@ -40,8 +40,10 @@ EffFieldCalc::EffFieldCalc(SimulationData &sd, const MeshData &msh) : nx(sd.nx),
 																	  A(sd.A), D(sd.D), Ku1(sd.Ku1), KuAxis(sd.Kuni),
 																	  cubicAxes(sd.cubicAxes), Kc1(sd.Kc1), Kc2(sd.Kc2), Ksn(sd.Ks),
 																	  nodeSurfaceArea(msh.nodeArea), nv_nx(msh.nv_nx),
-																	  tGradX(-msh.tGradX), tGradY(-msh.tGradY), tGradZ(-msh.tGradZ),
-																	  gradX(msh.gradX), gradY(msh.gradY),gradZ(msh.gradZ)
+																	  skewGradX(0.5 * (SpMat(msh.tGradX.transpose()) - msh.tGradX)),
+																	  skewGradY(0.5 * (SpMat(msh.tGradY.transpose()) - msh.tGradY)),
+																	  skewGradZ(0.5 * (SpMat(msh.tGradZ.transpose()) - msh.tGradZ)),
+																	  gradX(msh.gradX), gradY(msh.gradY), gradZ(msh.gradZ)
 {
 	Hexc = MatrixXd::Zero(nx, 3);
 	Hani = MatrixXd::Zero(nx, 3);
@@ -156,16 +158,9 @@ MatrixXd EffFieldCalc::surfIntKs( MRef &Mag ) {
 }
 */
 
-MatrixXd EffFieldCalc::surfIntDMI(MRef &Mag)
-{
-	// Boundary conditions according to Rohart and Thiaville
-	MatrixXd surfDMI = nodeSurfaceArea.asDiagonal() * cross(Mag, nv_nx);
-	return surfDMI;
-}
-
 MatrixXd EffFieldCalc::dmiField(MRef &Mag)
 {
-	Hdmi = (surfIntDMI(Mag) - 2. * curlM(Mag)).array().colwise() * invNodeVol.cwiseProduct(D).array();
+	Hdmi = (-2. * curlM(Mag)).array().colwise() * invNodeVol.cwiseProduct(D).array();
 	return Hdmi;
 }
 
@@ -280,19 +275,10 @@ void EffFieldCalc::setDMIField(const MRef &Hdmi_)
 MatrixXd EffFieldCalc::curlM(MRef &Mag)
 {
 	MatrixXd curlM(nx, 3);
-	/*
-// copying to const Vector doesn't affect the performance.
-	const VectorXd Mx = Mag.col(x);
-	const VectorXd My = Mag.col(y);
-	const VectorXd Mz = Mag.col(z);
-	curlM.col(x) = tGradY * Mz - tGradZ * My;
-	curlM.col(y) = tGradZ * Mx - tGradX * Mz;
-	curlM.col(z) = tGradX * My - tGradY * Mx;
-*/
 
-	curlM.col(x) = tGradY * Mag.col(z) - tGradZ * Mag.col(y);
-	curlM.col(y) = tGradZ * Mag.col(x) - tGradX * Mag.col(z);
-	curlM.col(z) = tGradX * Mag.col(y) - tGradY * Mag.col(x);
+	curlM.col(x) = skewGradY * Mag.col(z) - skewGradZ * Mag.col(y);
+	curlM.col(y) = skewGradZ * Mag.col(x) - skewGradX * Mag.col(z);
+	curlM.col(z) = skewGradX * Mag.col(y) - skewGradY * Mag.col(x);
 
 	return curlM;
 }

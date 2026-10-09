@@ -58,7 +58,7 @@ private:
 	Eigen::Matrix<value_type, Eigen::Dynamic, Eigen::Dynamic> retMatXd;
 	std::shared_ptr<SpMatCUDA> xc_cuda;
 	std::shared_ptr<SpMatCUDA> GradX_cuda, GradY_cuda, GradZ_cuda;
-	std::shared_ptr<SpMatCUDA> tGradX_cuda, tGradY_cuda, tGradZ_cuda;
+	std::shared_ptr<SpMatCUDA> skewGradX_cuda, skewGradY_cuda, skewGradZ_cuda;
 	std::shared_ptr<dev_vec> Hxcx_d;
 	std::shared_ptr<dev_vec> Hxcy_d;
 	std::shared_ptr<dev_vec> Hxcz_d;
@@ -70,8 +70,6 @@ private:
 	std::shared_ptr<dev_vec> eta_jx_d, eta_jy_d, eta_jz_d;
 	std::shared_ptr<dev_vec> curlM, cmx1, cmx2, cmy1, cmy2, cmz1, cmz2;
 	std::shared_ptr<dev_vec> dmi_fac, dmi3;
-	std::shared_ptr<dev_vec>  nv_surf_x, nv_surf_y, nv_surf_z;
-	std::shared_ptr<dev_vec> surfTerm;
 	std::shared_ptr<dev_vec> u_xx, u_xy, u_xz, u_yx, u_yy, u_yz, u_zx, u_zy, u_zz;
 	std::shared_ptr<dev_vec> ju_xx, ju_xy, ju_xz, ju_yx, ju_yy, ju_yz, ju_zx, ju_zy, ju_zz;
 	std::shared_ptr<dev_vec> u_term_stt;
@@ -92,7 +90,7 @@ public:
 	void setMagDev(const std::vector<value_type>&);
 	void setMagDev(const devVecD&);
 	void setExchangeMatOnDev(const SpMat& );
-	void setGradientMatsOnDev(const SpMat&, const SpMat&, const SpMat& );
+	void setDMIGradientMatsOnDev(const SpMat&, const SpMat&, const SpMat& );
 
 	Eigen::Matrix< value_type, Eigen::Dynamic, Eigen::Dynamic > ExchangeFieldGPU();
 	Eigen::Matrix< value_type, Eigen::Dynamic, Eigen::Dynamic > UniaxialAnisotropyField();
@@ -109,7 +107,7 @@ public:
 	value_type MaxTorque(MRef&);
 	void setUniaxialAnisotropy(const Eigen::MatrixXd&, const Eigen::VectorXd&);
 	void setCubicAnisotropy(const std::vector<Eigen::Matrix3d>&, const Eigen::VectorXd&, const Eigen::VectorXd&);
-	void setDMIdata(const Eigen::VectorXd&, const Eigen::VectorXd&, const Eigen::MatrixXd&, const Eigen::VectorXd&);
+	void setDMIdata(const Eigen::VectorXd&, const Eigen::VectorXd&);
 	Eigen::Matrix<value_type, Eigen::Dynamic, Eigen::Dynamic> DMIField();
 	void setInvJs(const Eigen::VectorXd&);
 	void computeAndAccumulateHeff(bool useUniaxial, bool useDMI);
