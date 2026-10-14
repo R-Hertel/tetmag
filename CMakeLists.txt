@@ -22,7 +22,8 @@
 #
 cmake_minimum_required(VERSION 3.18)
 
-project(tetmag VERSION 1.10.0 LANGUAGES C CXX)
+
+project(tetmag VERSION 1.10.1 LANGUAGES C CXX)
 # These options can be set with ccmake or with cmake -D 
 option(TETMAG_USE_OPENMP "Compile with OpenMP" ON)
 option(TETMAG_USE_CUDA "Enable CUDA" ON)
@@ -233,6 +234,11 @@ if(USE_OpenMP)
 endif(USE_OpenMP)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  C_STANDARD 17
+  C_STANDARD_REQUIRED YES
+  C_EXTENSIONS YES
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${EIGEN3_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${EXTDIR}/h2lib/Library>)

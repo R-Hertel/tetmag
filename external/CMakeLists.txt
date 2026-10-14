@@ -56,7 +56,7 @@ ExternalProject_Add(h2lib
   UPDATE_DISCONNECTED true
   SOURCE_DIR ${EXTDIR}/h2lib
   CONFIGURE_COMMAND ${H2CONFIG}
-  BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} libh2.a
+  BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} libh2.a "CC=${CMAKE_C_COMPILER} -std=gnu17"
   BUILD_IN_SOURCE true
   INSTALL_COMMAND cmake -E echo "Skipping install step of h2Lib."
 )
